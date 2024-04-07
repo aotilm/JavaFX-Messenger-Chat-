@@ -84,7 +84,8 @@ public class ClientController implements Initializable {
             outObject = new ObjectOutputStream(clientSocket.getOutputStream());
             inObject = new ObjectInputStream(clientSocket.getInputStream());
             System.out.println("Ok");
-            new ReadMessage().start();             
+            new ReadMessage().start();    
+        	System.out.println("hwllo");
     	} catch (IOException e) {
             System.err.println(e);
         }
