@@ -2,8 +2,14 @@ package application;
 	
 import java.io.IOException;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
+import tables.Clients;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.fxml.FXMLLoader;
@@ -19,17 +25,26 @@ public class Main extends Application {
 			primaryStage.setScene(scene);
 			primaryStage.show();
 			primaryStage.setOnCloseRequest(event -> {
-				try {
-					ClientController.clientSocket.close();
-					ClientController.in.close();
-					ClientController.out.close();
-					ClientController.inObject.close();
-					ClientController.outObject.close();
-				}catch (IOException e) { 
-		            System.err.println(e);
-		        }
-				
+			    try {
+			        if (ClientController.clientSocket != null && !ClientController.clientSocket.isClosed()) {
+			            ClientController.clientSocket.close();
+			        }
+			        if (ClientController.inObject != null) {
+			            ClientController.inObject.close();
+			        }
+			        if (ClientController.outObject != null) {
+			            ClientController.outObject.close();
+			        }
+			        if (!ClientController.name.isEmpty()) {
+			            ClientController.updateActiveStatus(ClientController.name, false);
+			        }
+			    } catch (IOException e) { 
+			        System.err.println(e);
+			    } finally {
+			    	primaryStage.close(); 
+			    }
 			});
+
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

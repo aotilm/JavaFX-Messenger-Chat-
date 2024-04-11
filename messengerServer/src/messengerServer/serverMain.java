@@ -25,17 +25,28 @@ public class serverMain {
 }
 
 class Server {
-    public ArrayList<ClientHandler> clients = new ArrayList<>();
+    public static ArrayList<ClientHandler> clients = new ArrayList<>();
     public int port = 4004;
+    private BufferedReader in;
+//    private BufferedWriter out;
     public Server() {
-        try (ServerSocket server = new ServerSocket(port)) {
+        try  {
+        	ServerSocket server = new ServerSocket(port);
+        	ServerSocket serverName = new ServerSocket(4005);
             System.out.println("Сервер запущений!");
-
+            Socket nameSocket;
+            Socket clientSocket;
             while (true) {
-                Socket clientSocket = server.accept();
-                ClientHandler client = new ClientHandler(clientSocket, this);
+            	nameSocket = serverName.accept();
+                in = new BufferedReader(new InputStreamReader(nameSocket.getInputStream()));
+                String name = in.readLine();
+                System.out.println("ім'я отримано!");
+                nameSocket.close();
+            	
+                clientSocket = server.accept();
+                ClientHandler client = new ClientHandler(clientSocket, this, name);
                 clients.add(client);
-               
+
                 System.out.println(clients.size());
                 new Thread(client).start();
             }
@@ -43,6 +54,7 @@ class Server {
             System.err.println(e);
         }
     }
+
     
     
     public void sendToAll(Message ms, ClientHandler currentClient) {
@@ -52,12 +64,18 @@ class Server {
             }
         }
     }
-//    
-//    public void sendToClient(String str, ClientHandler client) {
-//    	client.sendMessage(str);
-//    }
-//
-//    
+    
+    public void sendToChat(Message ms, ClientHandler currentClient) {
+    	Message inMess = ms;
+    	String recipient = inMess.getRecipientName();
+    	for (ClientHandler client : clients) {
+            if (client.getName().equals(recipient)) {
+                client.sendMessage(ms);
+            }
+        }
+    	
+    }
+    
     public void removeClient(ClientHandler client) {
         clients.remove(client);
     }
@@ -66,64 +84,43 @@ class Server {
 
 class ClientHandler implements Runnable {
 	private Socket clientSocket;
-    private BufferedReader in;
-    private BufferedWriter out;
+//    private BufferedReader in;
+//    private BufferedWriter out;
     private ObjectInputStream inObject;
     private ObjectOutputStream outObject;
+    public String name;
 
     private Server server;
-    private String name;
 
-    public ClientHandler(Socket socket, Server server) {
+    public ClientHandler(Socket socket, Server server, String name) {
         try {
         	this.clientSocket = socket;
         	this.server = server;
-			this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			this.out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 			this.outObject = new ObjectOutputStream(clientSocket.getOutputStream());
 			this.inObject = new ObjectInputStream(clientSocket.getInputStream());
+			this.name = name;
 		    System.out.println("Ok");
 
-//			sendMessage("Введіть ваше ім'я");
-//			this.name = in.readLine();
-//			
-//			server.sendToAll("$", this);
-//			server.sendToAll(this.name, this);
-//			System.out.println(name);
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
     }
     
+ 
     public String getName() {
 		return name;
 	}
 
-    @Override
-    public void run() {
-//        Thread currentThread = Thread.currentThread();
-//        System.out.println("Створено новий потік для клієнта: " + currentThread.getName());
-        System.out.println("Користувачів в спискові: " + server.clients.size());
 
+	@Override
+    public void run() {
+        System.out.println("Користувачів в спискові: " + server.clients.size());
+//        Server.clients.
         try {
-//    		server.sendToAll("НОВИЙ КОРИСТУВАЧ ПІД'ЄДНАВСЯ", this);
-          		
-//        	String message ;
         	Message response;
         	while ((response = (Message) inObject.readObject()) != null) {
-//        		String message = response.getMessage();
-        		server.sendToAll(response, this);
-        		
-        		
-//        		int spaceIndex = message.indexOf(" ");
-//        		name = message.substring(0, spaceIndex);
-//        	    System.out.println("Повідомлення Клієнта: " + message);
-//        	    server.sendToAll(this.name +": " + message, this);
-//        	    server.sendToAll(message, this);
-
-//        	    System.out.println("+++");
-//        	    out.flush();
+//        		server.sendToAll(response, this);
+        		server.sendToChat(response, this);
         	}
         
         } catch (IOException | ClassNotFoundException e) {
@@ -138,8 +135,6 @@ class ClientHandler implements Runnable {
     
     public void close() {
     	try {
-            in.close();
-            out.close();
             inObject.close();
             outObject.close();
             clientSocket.close();
@@ -153,8 +148,6 @@ class ClientHandler implements Runnable {
     
     public void sendMessage(Message ms) {
         try {
-//            out.write(message + "\n");
-//            out.flush();
         	outObject.writeObject(ms);
             outObject.flush();
         } catch (IOException e) {

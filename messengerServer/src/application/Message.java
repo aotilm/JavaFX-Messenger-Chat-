@@ -1,16 +1,51 @@
 package application;
 
 import java.io.Serializable;
+import java.util.Date;
 
+//import javax.persistence.Column;
+//import javax.persistence.Entity;
+//import javax.persistence.GeneratedValue;
+//import javax.persistence.GenerationType;
+//import javax.persistence.Id;
+//import javax.persistence.Table;
+//import javax.persistence.Temporal;
+//import javax.persistence.TemporalType;
+//
+//@Entity
+//@Table(name = "History")
 public class Message implements Serializable{
+public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	//	@Id
+//	@GeneratedValue(strategy=GenerationType.IDENTITY)
+//	@Column
+	private int id;
+	
+//	@Column 
 	private String senderName;
+	
+//	@Column 
 	private String recipientName;
+	
+//	@Column 
 	private String message;
 	
-	public Message(String senderName, String recipientName, String message) {
+//	@Column 
+//	@Temporal(TemporalType.TIMESTAMP)
+    private Date date;
+	
+	public Message(String senderName, String recipientName, String message, Date date) {
 		this.senderName = senderName;
 		this.recipientName = recipientName;
 		this.message = message;
+		this.date = date;
 	}
 
 	public String getSenderName() {

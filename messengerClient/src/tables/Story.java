@@ -22,6 +22,9 @@ public class Story {
 	private String sender;
 	
 	@Column 
+	private String message;
+	
+	@Column 
 	private int chatId;
 
 	public Story() {

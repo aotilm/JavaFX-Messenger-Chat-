@@ -18,13 +18,17 @@ public class Clients {
 	@Column 
 	private String name;
 	
+	@Column
+	private boolean activeStatus;
+	
 	public Clients() {
 		
 	}
 
-	
-	public Clients(String name) {
+	public Clients(String name, boolean activeStatus) {
+		super();
 		this.name = name;
+		this.activeStatus = activeStatus;
 	}
 
 	public int getId() {
@@ -43,10 +47,19 @@ public class Clients {
 		this.name = name;
 	}
 
+	public boolean isActiveStatus() {
+		return activeStatus;
+	}
+
+	public void setActiveStatus(boolean activeStatus) {
+		this.activeStatus = activeStatus;
+	}
+
 	@Override
 	public String toString() {
-		return "Clients [id=" + id + ", name=" + name + "]";
+		return "Clients [id=" + id + ", name=" + name + ", activeStatus=" + activeStatus + "]";
 	}
+
 
 
 
