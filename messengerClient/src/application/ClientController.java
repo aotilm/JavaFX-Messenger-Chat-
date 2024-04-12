@@ -439,6 +439,10 @@ public class ClientController implements Initializable {
     	
     }
     
+    public void drawUserMessage() {
+    	
+    }
+    
 
     public void sendMessage(Message ms) {
         	
