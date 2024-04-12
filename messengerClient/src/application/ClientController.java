@@ -101,7 +101,8 @@ public class ClientController implements Initializable {
           try {
               session.beginTransaction();
 
-              Query<Message> query = session.createQuery("FROM Message WHERE recipientName = ?1 AND senderName = ?2", Message.class);
+              Query<Message> query = session.createQuery("FROM Message WHERE recipientName = ?1 and senderName = ?2 "
+              		+ "or recipientName =?2 and senderName = ?1", Message.class);
               query.setParameter(1, recipient);
               query.setParameter(2, sender);
 
@@ -118,11 +119,11 @@ public class ClientController implements Initializable {
 //                	  createOtherMessage(ms.getMessage(), ms.getRecipientName(), dateText();
                   }
                   else {
-                	  createOtherMessage(ms.getMessage(), ms.getRecipientName(), dateText);
+                	  createOtherMessage(ms.getMessage(), ms.getSenderName(), dateText);
                   }
                   
               }
-              System.out.println(history);
+              System.out.println(history.toString());
               session.getTransaction().commit();
           }finally {
               session.close();
@@ -187,7 +188,7 @@ public class ClientController implements Initializable {
     	    	                    System.out.println("Вибраний чат: " + selectedChat);
     	    	                    chooseChatPane.toBack();
     	    	                    messagePane.getChildren().clear();
-//    	    	                    importHistory(name, selectedChat);
+    	    	                    importHistory(name, selectedChat);
     	    	                    break; 
     	    	                }
     	    	            }
@@ -207,6 +208,7 @@ public class ClientController implements Initializable {
     		connectToServer();
     		chatPane.toFront();
     		chooseChatPane.toFront();
+    		addUser();
     	}
     	else {
     		clientRegistration();
@@ -300,7 +302,8 @@ public class ClientController implements Initializable {
         try {
             session.beginTransaction();
 
-            Query<Clients> query = session.createQuery("FROM Clients WHERE activeStatus = true", Clients.class);
+            Query<Clients> query = session.createQuery("FROM Clients ", Clients.class);
+//            WHERE activeStatus = true
             onlineUsers.clear();
             onlineUsers.addAll(query.list());
             System.out.println(onlineUsers);

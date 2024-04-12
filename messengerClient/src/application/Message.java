@@ -34,9 +34,9 @@ public class Message implements Serializable{
     private Date date;
 	
 
-//	public Message() {
-//		
-//	}
+	public Message() {
+		
+	}
 	
 	public Message(String senderName, String recipientName, String message, Date date) {
 		this.senderName = senderName;

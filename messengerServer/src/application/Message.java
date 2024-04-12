@@ -41,6 +41,10 @@ public Date getDate() {
 //	@Temporal(TemporalType.TIMESTAMP)
     private Date date;
 	
+	public Message() {
+		
+	}
+    
 	public Message(String senderName, String recipientName, String message, Date date) {
 		this.senderName = senderName;
 		this.recipientName = recipientName;
