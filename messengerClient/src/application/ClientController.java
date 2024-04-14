@@ -423,11 +423,11 @@ public class ClientController implements Initializable {
     		AnchorPane mainPane = new AnchorPane();
     		VBox pane = new VBox();
     		messagePane.setMargin(mainPane , new Insets(6));
-    		String style = " -fx-padding: 15px; -fx-background-color: #9CEAFB; -fx-background-radius: 25px;";
+    		String style = " -fx-padding: 15px;  -fx-background-color: #9CEAFB; -fx-background-radius: 25px;";
     		pane.setStyle(style);
     		Label messageLbl = new Label();
     		messageLbl.setText("Ви: "+ message );
-    		messageLbl.setStyle("-fx-text-fill: 2F3135;");
+    		messageLbl.setStyle("-fx-text-fill: 2F3135; -fx-font-weight: bold;");
 
     		messageLbl.setFont(Font.font(14));
     		messageLbl.setMaxWidth(550);
@@ -467,10 +467,10 @@ public class ClientController implements Initializable {
 
             messagePane.setMargin(mainPane, new Insets(6));
 
-            pane.setStyle(" -fx-padding: 15px; -fx-background-color: #6E7888; -fx-background-radius: 25px; ");
+            pane.setStyle(" -fx-padding: 15px; -fx-background-color:  #6E7888; -fx-background-radius: 25px; ");
     		Label messageLbl = new Label();
     		messageLbl.setText(senderName+ ": " + message );
-    		messageLbl.setStyle("-fx-text-fill: white;");
+    		messageLbl.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
     		messageLbl.setFont(Font.font(14));
 
     		messageLbl.setMaxWidth(550);
