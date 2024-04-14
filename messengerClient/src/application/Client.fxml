@@ -4,8 +4,11 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -16,66 +19,73 @@
          <children>
             <StackPane prefHeight="150.0">
                <children>
-                  <AnchorPane fx:id="singInPane" style="-fx-background-color: white;">
+                  <AnchorPane fx:id="singInPane" style="-fx-background-color: #2F3135;">
                      <children>
-                        <TextField fx:id="textName" layoutX="366.0" layoutY="258.0" promptText="Наприклад: &quot;Андрій&quot;" />
-                        <Label layoutX="387.0" layoutY="229.0" text="Введіть ваше ім'я">
+                        <TextField fx:id="textName" layoutX="353.0" layoutY="253.0" prefHeight="45.0" prefWidth="246.0" promptText="Наприклад: &quot;Андрій&quot;" style="-fx-background-color: #5A5552; -fx-background-radius: 20px; -fx-text-fill: white; -fx-font-size: 18px; -fx-alignment: center; -fx-font-weight: bold;" />
+                        <Label layoutX="362.0" layoutY="212.0" text="Введіть ваше ім'я" textFill="WHITE">
                            <font>
-                              <Font name="Liberation Serif Bold" size="15.0" />
+                              <Font name="System Bold" size="22.0" />
                            </font>
                         </Label>
-                        <Button fx:id="btnGoChat" layoutX="389.0" layoutY="294.0" mnemonicParsing="false" onAction="#userAuthentication" text="Увійти до чату">
+                        <Button fx:id="btnGoChat" layoutX="387.0" layoutY="310.0" mnemonicParsing="false" onAction="#userAuthentication" style="-fx-background-radius: 20px; -fx-background-color: #6E7888; -fx-text-fill: white;" text="Увійти до чату">
                            <font>
-                              <Font name="Liberation Serif Bold" size="14.0" />
+                              <Font name="System Bold" size="18.0" />
                            </font>
                         </Button>
                      </children>
                   </AnchorPane>
                   <BorderPane fx:id="chatPane" prefHeight="200.0">
                      <left>
-                        <BorderPane prefHeight="700.0" prefWidth="300.0" BorderPane.alignment="CENTER">
-                           <center>
-                              <ScrollPane fx:id="usersListPane" hbarPolicy="NEVER" prefHeight="700.0" prefWidth="300.0" BorderPane.alignment="CENTER">
-                                 <content>
-                                    <VBox fx:id="vbox" prefWidth="300.0" />
-                                 </content>
-                              </ScrollPane>
-                           </center>
-                           <bottom>
-                              <Button fx:id="updateChats" mnemonicParsing="false" onAction="#addUser" text="Оновити" BorderPane.alignment="CENTER">
-                                 <font>
-                                    <Font name="Liberation Serif" size="14.0" />
-                                 </font></Button>
-                           </bottom>
-                        </BorderPane>
-                     </left>
-                     <center>
-                        <BorderPane prefHeight="700.0" BorderPane.alignment="CENTER">
-                           <top>
-                              <Button fx:id="addButton" mnemonicParsing="false" onAction="#checkOnlineUsers" text="додати користувача" BorderPane.alignment="CENTER" />
-                           </top>
+                        <BorderPane prefHeight="700.0" prefWidth="300.0" style="-fx-background-color: #6E7888;" BorderPane.alignment="CENTER">
                            <center>
                               <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <children>
+                                    <ScrollPane fx:id="scrollPane1" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" style="-fx-background-color: #2F3135;" vbarPolicy="NEVER">
+                                       <content>
+                                          <VBox fx:id="vbox" prefWidth="300.0" style="-fx-background-color: #2F3135;" />
+                                       </content>
+                                    </ScrollPane>
+                                 </children>
+                              </StackPane>
+                           </center>
+                           <top>
+                              <HBox prefHeight="49.0" prefWidth="300.0" style="-fx-background-color: #2F3135;" BorderPane.alignment="CENTER" />
+                           </top>
+                        </BorderPane>
+                     </left>
+                     <center>
+                        <BorderPane prefHeight="700.0" prefWidth="650.0" BorderPane.alignment="CENTER">
+                           <center>
+                              <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                 <children>
+                                    <AnchorPane fx:id="chooseChatPane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;">
+                                       <children>
+                                          <Label layoutX="233.0" layoutY="230.0" text="Виберіть чат">
+                                             <font>
+                                                <Font name="Liberation Serif Bold" size="23.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </AnchorPane>
                                     <BorderPane prefHeight="200.0" prefWidth="200.0">
                                        <bottom>
-                                          <AnchorPane prefHeight="39.0" prefWidth="600.0" style="-fx-background-color: #AAA;" BorderPane.alignment="CENTER">
+                                          <AnchorPane prefHeight="40.0" style="-fx-background-color: #6E7888;" BorderPane.alignment="CENTER">
                                              <children>
-                                                <TextField fx:id="textMessage" layoutX="14.0" layoutY="7.0" prefHeight="24.0" prefWidth="485.0" />
-                                                <Button fx:id="btnSend" layoutX="505.0" layoutY="7.0" mnemonicParsing="false" onAction="#sendUsersMessage" prefHeight="24.0" prefWidth="90.0" text="Надіслати">
-                                                   <font>
-                                                      <Font name="Liberation Serif Bold" size="13.0" />
-                                                   </font>
-                                                </Button>
+                                                <ImageView fitHeight="25.0" fitWidth="25.0" layoutX="611.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../images/skrepka.png" />
+                                                   </image>
+                                                </ImageView>
+                                                <TextField fx:id="textMessage" layoutX="14.0" layoutY="7.0" prefHeight="24.0" prefWidth="583.0" promptText="Введіть повідомлення" style="-fx-background-color: #5A5552; -fx-background-radius: 20px; -fx-text-fill: white;" />
                                              </children>
                                           </AnchorPane>
                                        </bottom>
                                        <center>
-                                          <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" BorderPane.alignment="CENTER">
+                                          <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" style="-fx-background-color: #2F3135;" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
                                              <content>
-                                                <VBox fx:id="messagePane">
+                                                <VBox fx:id="messagePane" style="-fx-background-color: #2F3135;">
                                                    <children>
-                                                      <Label prefHeight="40.0" prefWidth="600.0" text="                                                     Вітаємо у чаті!" textAlignment="RIGHT">
+                                                      <Label prefHeight="40.0" prefWidth="648.0" style="-fx-text-fill: white;" text="                                                         Вітаємо у чаті!" textAlignment="CENTER">
                                                          <font>
                                                             <Font name="Liberation Serif Bold" size="18.0" />
                                                          </font>
@@ -86,15 +96,6 @@
                                           </ScrollPane>
                                        </center>
                                     </BorderPane>
-                                    <AnchorPane fx:id="chooseChatPane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: white;">
-                                       <children>
-                                          <Label layoutX="233.0" layoutY="230.0" text="Виберіть чат">
-                                             <font>
-                                                <Font name="Liberation Serif Bold" size="23.0" />
-                                             </font>
-                                          </Label>
-                                       </children>
-                                    </AnchorPane>
                                  </children>
                               </StackPane>
                            </center>

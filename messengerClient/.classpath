@@ -26,5 +26,6 @@
 	<classpathentry kind="lib" path="lib/mysql-connector-j-8.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/stax-ex-1.8.jar"/>
 	<classpathentry kind="lib" path="lib/txw2-2.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/AnimateFX-1.2.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

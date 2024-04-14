@@ -21,6 +21,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -35,6 +36,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.control.Alert.AlertType;
@@ -67,7 +70,7 @@ public class ClientController implements Initializable {
     private TextField textMessage, textName;
     
     @FXML
-    private ScrollPane scrollPane, usersListPane;
+    private ScrollPane scrollPane;
     
     @FXML
     private AnchorPane singInPane, chooseChatPane;
@@ -91,6 +94,14 @@ public class ClientController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 		singInPane.toFront();
+		textMessage.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.ENTER)) {
+                	createUsersMessage(textMessage.getText());
+                }
+            }
+        });
     }
     public void importHistory(String sender, String recipient) {
     	  SessionFactory factory = new Configuration()
@@ -115,7 +126,7 @@ public class ClientController implements Initializable {
           		  String dateText = formatter.format(date);
           		  
                   if (ms.getSenderName().equals(sender)) {
-                	  importUsersMessage(ms.getMessage());
+                	  importUsersMessage(ms.getMessage(), ms.getDate());
 //                	  createOtherMessage(ms.getMessage(), ms.getRecipientName(), dateText();
                   }
                   else {
@@ -130,13 +141,17 @@ public class ClientController implements Initializable {
               factory.close();
           }
     }
+    
     public void addUser() {
     	checkOnlineUsers();
     	vbox.getChildren().clear();
+    	vbox.setStyle("-fx-background-color: #2F3135");
     	for (Clients client : onlineUsers) {
     		if(!client.getName().equals(name)) {
     			Platform.runLater(() -> {
     				HBox pane = new HBox();
+    				vbox.setMargin(pane, new Insets(5, 10, 5, 10));
+
     				pane.setAlignment(Pos.CENTER_LEFT);
     	    	    pane.setPrefWidth(300);
     	    	    pane.setPrefHeight(70);
@@ -147,26 +162,31 @@ public class ClientController implements Initializable {
     	    	    avatar.setFitHeight(50);    	    	    
     	    	    
     	    	    Label l = new Label(client.getName());
-    	    	    l.setStyle("-fx-text-fill: black; -fx-font-size: 16px;");
+    	    	    l.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;");
     	    	    l.setLayoutY(20);
     	    	    l.setLayoutX(50);
-    	    	    pane.setMargin(avatar , new Insets(10,10,10,10));
-//    	    	    pane.setMargin(l , new Insets(10));
+    	    	    pane.setMargin(avatar , new Insets(10));
+
+    	    	    Label unread = new Label();
+    	    	    unread.setText("1");
+    	    	    unread.setStyle("-fx-padding: 5px; -fx-background-color: #6F6F6F; -fx-background-radius: 100px;");
+    	    	    unread.setMinWidth(25);
+    	    	    unread.setMinHeight(25);
     	    	    
     	    	    vbox.getChildren().add(pane); 
     	    	    pane.getChildren().addAll(avatar, l);	
     	    	    
     	    	    pane.setOnMouseEntered(event -> {
     	    	    	String currentColor = pane.getStyle();
-    	    	        if (!currentColor.contains("#777777")) {
-    	    	            pane.setStyle("-fx-background-color: #A7A7A7;");
+    	    	        if (!currentColor.contains("#504C4A")) {
+    	    	            pane.setStyle("-fx-background-color: #5A5552;");
     	    	        }
     	    	    });
 
     	    	    pane.setOnMouseExited(event -> {
     	    	    	String currentColor = pane.getStyle();
-    	    	        if (!currentColor.contains("#777777")) {
-    	    	        	pane.setStyle("-fx-background-color: #D9D9D9;");
+    	    	        if (!currentColor.contains("#504C4A")) {
+    	    	        	pane.setStyle("-fx-background-color: #6E7888;");
     	    	        }
     	    	        
     	    	    });
@@ -176,17 +196,21 @@ public class ClientController implements Initializable {
     	    	        	for (Node node : vbox.getChildren()) {
     	    	        	    if (node instanceof HBox) {
     	    	        	        HBox hbox = (HBox) node;
-    	    	        	        hbox.setStyle("-fx-background-color: #D9D9D9;");
+    	    	        	        hbox.setStyle("-fx-background-color: #6E7888;");
     	    	        	    }
     	    	        	}
     	    	        	
     	    	            for (Node node : pane.getChildren()) {
     	    	                if (node instanceof Label) {
-    	    	                	pane.setStyle("-fx-background-color: #777777;");
+    	    	                	pane.setStyle("-fx-background-color: #504C4A;");
     	    	                    Label clickedLabel = (Label) node;
     	    	                    selectedChat = clickedLabel.getText();
     	    	                    System.out.println("Вибраний чат: " + selectedChat);
     	    	                    chooseChatPane.toBack();
+    	    	                    
+    	    	            		new animatefx.animation.FadeOutLeft(messagePane).setSpeed(3.0).play();
+    	    	            		new animatefx.animation.FadeInLeft(messagePane).setSpeed(3.0).play();
+    	    	            	
     	    	                    messagePane.getChildren().clear();
     	    	                    importHistory(name, selectedChat);
     	    	                    break; 
@@ -200,12 +224,13 @@ public class ClientController implements Initializable {
     	}    
     }
     
-    
     public void userAuthentication() {
     	name = textName.getText();
     	if (checkClientInDB(name)) {
     		updateActiveStatus(name, true);
     		connectToServer();
+    		new animatefx.animation.FadeOutDown(singInPane).setSpeed(2.5).play();
+    		new animatefx.animation.FadeInDown(chatPane).setSpeed(2.5).play();
     		chatPane.toFront();
     		chooseChatPane.toFront();
     		addUser();
@@ -214,7 +239,6 @@ public class ClientController implements Initializable {
     		clientRegistration();
     	}
     }
-    
     
     public void connectToServer() {
     	try{
@@ -360,42 +384,20 @@ public class ClientController implements Initializable {
 		} finally { factory.close(); session.close();}
     }
     
-    public void sendUsersMessage() {
-    	createUsersMessage(textMessage.getText());
-    }
-    public void importUsersMessage(String message) {
+//    public void sendUsersMessage(KeyEvent event) {
+//    	if (event.getCode().equals(KeyCode.ENTER)) {
+//    		createUsersMessage(textMessage.getText());
+//    	}
+//    	
+//    }
+  
+    public void importUsersMessage(String message, Date date) {
     	Platform.runLater(() -> {
-    		Date date = new Date();
     		Message ms = new Message(name, selectedChat, message, date);
     		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm EE");
     		String dateText = formatter.format(date);
     		
-    		AnchorPane mainPane = new AnchorPane();
-    		VBox pane = new VBox();
-    		messagePane.setMargin(mainPane , new Insets(6));
-    		pane.setStyle(" -fx-padding: 15px; -fx-background-color: #6F6F6F; -fx-background-radius: 25px; ");
-    		Label messageLbl = new Label();
-    		messageLbl.setText("Ви: "+ message );
-    		messageLbl.setStyle("-fx-text-fill: white;");
-
-    		messageLbl.setMaxWidth(550);
-    		messageLbl.setWrapText(true);
-    		
-    		Label dateLbl = new Label(dateText);
-    		dateLbl.setFont(Font.font(10));
-    		dateLbl.setStyle("-fx-text-fill: white;");
-    		
-    		
-        	messagePane.getChildren().addAll(mainPane);
-        	mainPane.getChildren().addAll(pane);
-        	mainPane.setRightAnchor(pane, 0.0);
-        	pane.setAlignment(Pos.CENTER_RIGHT);
-
-        	pane.getChildren().addAll(messageLbl, dateLbl);
-        	textMessage.clear();
-//        	sendMessage(ms);
-        	scrollPane.vvalueProperty().bind(messagePane.heightProperty());
-//        	saveMessage(name, selectedChat, message, date);
+    		drawUserMessage(ms.getMessage(), dateText);
 
     	});
     	
@@ -403,25 +405,37 @@ public class ClientController implements Initializable {
     
     public void createUsersMessage(String message) {
     	Platform.runLater(() -> {
-    		Date date = new Date();
-    		Message ms = new Message(name, selectedChat, message, date);
+    		Date dt = new Date();
+    		Message ms = new Message(name, selectedChat, message, dt);
     		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm EE");
-    		String dateText = formatter.format(date);
+    		String dateText = formatter.format(dt);
     		
+    		drawUserMessage(ms.getMessage(), dateText);
+        	sendMessage(ms);
+//        	scrollPane.vvalueProperty().bind(messagePane.heightProperty());
+        	saveMessage(name, selectedChat, message, dt);
+
+    	});
+    	
+    }
+    
+    public void drawUserMessage(String message, String date) {    		    		
     		AnchorPane mainPane = new AnchorPane();
     		VBox pane = new VBox();
     		messagePane.setMargin(mainPane , new Insets(6));
-    		pane.setStyle(" -fx-padding: 15px; -fx-background-color: #6F6F6F; -fx-background-radius: 25px; ");
+    		String style = " -fx-padding: 15px; -fx-background-color: #9CEAFB; -fx-background-radius: 25px;";
+    		pane.setStyle(style);
     		Label messageLbl = new Label();
     		messageLbl.setText("Ви: "+ message );
-    		messageLbl.setStyle("-fx-text-fill: white;");
+    		messageLbl.setStyle("-fx-text-fill: 2F3135;");
 
+    		messageLbl.setFont(Font.font(14));
     		messageLbl.setMaxWidth(550);
     		messageLbl.setWrapText(true);
     		
-    		Label dateLbl = new Label(dateText);
-    		dateLbl.setFont(Font.font(10));
-    		dateLbl.setStyle("-fx-text-fill: white;");
+    		Label dateLbl = new Label(date);
+    		dateLbl.setFont(Font.font(12));
+    		dateLbl.setStyle("-fx-text-fill: #2F3135;");
     		
     		
         	messagePane.getChildren().addAll(mainPane);
@@ -431,19 +445,11 @@ public class ClientController implements Initializable {
 
         	pane.getChildren().addAll(messageLbl, dateLbl);
         	textMessage.clear();
-        	sendMessage(ms);
         	scrollPane.vvalueProperty().bind(messagePane.heightProperty());
-        	saveMessage(name, selectedChat, message, date);
+    		new animatefx.animation.ZoomInLeft(mainPane).setSpeed(2.0).play();
 
-    	});
-    	
     }
     
-    public void drawUserMessage() {
-    	
-    }
-    
-
     public void sendMessage(Message ms) {
         	
     		try {
@@ -461,22 +467,28 @@ public class ClientController implements Initializable {
 
             messagePane.setMargin(mainPane, new Insets(6));
 
-            pane.setStyle(" -fx-padding: 15px; -fx-background-color: #D9D9D9; -fx-background-radius: 25px; ");
+            pane.setStyle(" -fx-padding: 15px; -fx-background-color: #6E7888; -fx-background-radius: 25px; ");
     		Label messageLbl = new Label();
     		messageLbl.setText(senderName+ ": " + message );
+    		messageLbl.setStyle("-fx-text-fill: white;");
+    		messageLbl.setFont(Font.font(14));
 
     		messageLbl.setMaxWidth(550);
     		messageLbl.setWrapText(true);
     		
     		Label dateLbl = new Label(date);
-    		dateLbl.setFont(Font.font(10));
-    		
+    		dateLbl.setFont(Font.font(12));
+    		dateLbl.setStyle("-fx-text-fill: white;");
+
         	messagePane.getChildren().addAll(mainPane);
         	mainPane.getChildren().addAll(pane);
         	pane.setAlignment(Pos.CENTER_RIGHT);
 
         	pane.getChildren().addAll(messageLbl, dateLbl);
         	scrollPane.vvalueProperty().bind(messagePane.heightProperty());
+        	
+    		new animatefx.animation.ZoomInRight(mainPane).setSpeed(2.0).play();
+
 
         });
     }
@@ -495,10 +507,13 @@ public class ClientController implements Initializable {
             		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm EE");
             		String dateText = formatter.format(date);
                 	
-                    if  (!message.isEmpty()) {
+                    if  (!message.isEmpty() && selectedChat.equals(response.getSenderName())) {
                        createOtherMessage(message, senderName, dateText);
                        
                    }
+                    else {
+                    	
+                    }
                 }
             } catch (IOException | ClassNotFoundException  e) {
             	System.out.println(e);
