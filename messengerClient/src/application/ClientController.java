@@ -2,13 +2,17 @@ package application;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +25,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -35,6 +40,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -47,6 +53,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 //import messengerServer.ClientHandler;
 import tables.Clients;
@@ -77,12 +84,17 @@ public class ClientController implements Initializable {
     
     @FXML
     private BorderPane chatPane;
+    
+    @FXML
+    private ImageView pinFile;
 
     public static Socket clientSocket; 
     public static Socket nameSocket; 
     public static ObjectInputStream inObject;
     public static ObjectOutputStream outObject;
     public static BufferedWriter out;
+    public static BufferedReader in;
+
     public ArrayList<Clients> onlineUsers = new ArrayList<>();
     public ArrayList<Message> history = new ArrayList<>();
 
@@ -90,6 +102,7 @@ public class ClientController implements Initializable {
         
     public static String name;
     public String selectedChat;
+    private File selectedImageFile;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -102,7 +115,69 @@ public class ClientController implements Initializable {
                 }
             }
         });
+		
+//		pinFile.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+//
+//		     @Override
+//		     public void handle(MouseEvent event) {
+//		    	 chooseImg();
+//		         event.consume();
+//		     }
+//		});
     }
+    
+    public void chooseImg() {
+//        FileChooser fileChooser = new FileChooser();
+//        fileChooser.getExtensionFilters().addAll(
+//                new FileChooser.ExtensionFilter("Зображення", "*.png", "*.jpg", "*.gif"));
+//
+//        selectedImageFile = fileChooser.showOpenDialog(null);
+//        
+//        if (selectedImageFile != null) {
+//            try {
+//                // Читання зображення з файлу в байтовий масив
+//                FileInputStream fis = new FileInputStream(selectedImageFile);
+//                byte[] imageBytes = new byte[(int) selectedImageFile.length()];
+//                fis.read(imageBytes);
+//                fis.close();
+//
+//                // Встановлення з'єднання з сервером
+////                Socket socket = new Socket("localhost", 12345);
+//
+//                // Отримання вихідного потоку для відправлення даних
+////                OutputStream outputStream = socket.getOutputStream();
+//
+//                // Відправлення розміру масиву
+//                Date dt = new Date();
+//                Message ms = new Message(name, selectedChat, imageBytes.toString(), dt);
+//                outObject.write(ByteBuffer.allocate(4).putInt(imageBytes.length).array());
+//
+//                // Відправлення байтового масиву зображення
+//                outObject.writeObject(ms);
+//                outObject.flush();
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+
+//        if (selectedImageFile != null) {
+//            Image image = new Image(selectedImageFile.toURI().toString());
+//            System.out.println(selectedImageFile.toURI().toString());
+//            VBox pane = new VBox();
+//    		messagePane.setMargin(pane, new Insets(6,10,10,10));
+//    		
+//    		ImageView img = new ImageView(image);
+//    		img.setFitWidth(300);
+//    		img.setFitHeight(300);
+//        	pane.setAlignment(Pos.CENTER_RIGHT);
+//
+//    		messagePane.getChildren().add(pane);
+//    		pane.getChildren().add(img);
+//            
+//        }
+     }
+    
     public void importHistory(String sender, String recipient) {
     	  SessionFactory factory = new Configuration()
       			.configure("hibernate.cfg.xml")
@@ -167,14 +242,15 @@ public class ClientController implements Initializable {
     	    	    l.setLayoutX(50);
     	    	    pane.setMargin(avatar , new Insets(10));
 
-    	    	    Label unread = new Label();
-    	    	    unread.setText("1");
-    	    	    unread.setStyle("-fx-padding: 5px; -fx-background-color: #6F6F6F; -fx-background-radius: 100px;");
-    	    	    unread.setMinWidth(25);
-    	    	    unread.setMinHeight(25);
+    	    	    Label active = new Label();
+    	    	    active.setStyle("-fx-padding: 5px; -fx-background-color: green; -fx-background-radius: 100px;");
+    	    	    active.setMinWidth(5);
+    	    	    active.setMinHeight(5);
     	    	    
     	    	    vbox.getChildren().add(pane); 
-    	    	    pane.getChildren().addAll(avatar, l);	
+    	    	    pane.getChildren().addAll(avatar, l,active);	
+    	    	    
+//    	    	    active.addEventHandler(null, null);
     	    	    
     	    	    pane.setOnMouseEntered(event -> {
     	    	    	String currentColor = pane.getStyle();
@@ -244,6 +320,8 @@ public class ClientController implements Initializable {
     	try{
     		nameSocket =  new Socket(IP,4005);
     		out = new BufferedWriter(new OutputStreamWriter(nameSocket.getOutputStream()));
+            in = new BufferedReader(new InputStreamReader(nameSocket.getInputStream()));
+
             out.write(name);
             out.flush(); 
             out.close();
@@ -498,17 +576,20 @@ public class ClientController implements Initializable {
         @Override
         public void run() {
             try {
+            	
                 while (true) {
+
                 	Message response = (Message) inObject.readObject();
+                	
                 	String message = response.getMessage();
                 	String senderName = response.getSenderName();
                 	
                 	Date date = response.getDate();
             		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm EE");
             		String dateText = formatter.format(date);
-                	
                     if  (!message.isEmpty() && selectedChat.equals(response.getSenderName())) {
                        createOtherMessage(message, senderName, dateText);
+                       
                        
                    }
                     else {

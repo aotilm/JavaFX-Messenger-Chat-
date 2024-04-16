@@ -28,7 +28,7 @@ class Server {
     public static ArrayList<ClientHandler> clients = new ArrayList<>();
     public int port = 4004;
     private BufferedReader in;
-//    private BufferedWriter out;
+    private BufferedWriter out;
     public Server() {
         try  {
         	ServerSocket server = new ServerSocket(port);
@@ -39,6 +39,8 @@ class Server {
             while (true) {
             	nameSocket = serverName.accept();
                 in = new BufferedReader(new InputStreamReader(nameSocket.getInputStream()));
+                out = new BufferedWriter(new OutputStreamWriter(nameSocket.getOutputStream()));
+
                 String name = in.readLine();
                 System.out.println("ім'я отримано!");
                 nameSocket.close();
@@ -91,6 +93,7 @@ class ClientHandler implements Runnable {
     public String name;
 
     private Server server;
+    private Socket status;
 
     public ClientHandler(Socket socket, Server server, String name) {
         try {
@@ -106,21 +109,15 @@ class ClientHandler implements Runnable {
 		}
     }
     
- 
-    public String getName() {
-		return name;
-	}
-
 
 	@Override
     public void run() {
         System.out.println("Користувачів в спискові: " + server.clients.size());
-//        Server.clients.
         try {
         	Message response;
         	while ((response = (Message) inObject.readObject()) != null) {
-//        		server.sendToAll(response, this);
         		server.sendToChat(response, this);
+        		
         	}
         
         } catch (IOException | ClassNotFoundException e) {
@@ -139,7 +136,7 @@ class ClientHandler implements Runnable {
             outObject.close();
             clientSocket.close();
             server.removeClient(this);
-            System.out.println("вроді все закрив " + server.clients.size());
+            System.out.println("вроді все закрив " + server.clients.size() + this.name); 
         } catch (IOException e) {
             System.err.println("Помилка під час закриття потоку вводу/виводу: " + e);
         }
@@ -154,4 +151,8 @@ class ClientHandler implements Runnable {
             e.printStackTrace();
         }
     }
+    
+    public  String getName() {
+		return name; 
+	}
 }
