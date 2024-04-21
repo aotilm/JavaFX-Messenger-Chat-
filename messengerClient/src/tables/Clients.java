@@ -26,7 +26,6 @@ public class Clients {
 	}
 
 	public Clients(String name, boolean activeStatus) {
-		super();
 		this.name = name;
 		this.activeStatus = activeStatus;
 	}

@@ -3,6 +3,7 @@ package application;
 import java.io.Serializable;
 import java.util.Date;
 
+ 
 //import javax.persistence.Column;
 //import javax.persistence.Entity;
 //import javax.persistence.GeneratedValue;
@@ -37,9 +38,19 @@ public Date getDate() {
 //	@Column 
 	private String message;
 	
+	private int imageSize;
+	
+	private byte[] imageArray;
+	
+	private String imageType;
+	
+	private String imageName;
+	
 //	@Column 
 //	@Temporal(TemporalType.TIMESTAMP)
     private Date date;
+     
+	private boolean fileType;
 	
 	public Message() {
 		
@@ -51,6 +62,24 @@ public Date getDate() {
 		this.message = message;
 		this.date = date;
 	}
+
+
+	public Message(String senderName, String recipientName, int size, byte[] imageArray, String imageType,
+			String imageName, Date date, boolean fileType) {
+		this.senderName = senderName;
+		this.recipientName = recipientName;
+		this.imageSize = size;
+		this.imageArray = imageArray;
+		this.imageType = imageType;
+		this.imageName = imageName;
+		this.date = date;
+		this.fileType = fileType;
+	}
+	
+	public Message(boolean type) {
+		this.fileType = type;
+	}
+
 
 	public String getSenderName() {
 		return senderName;
@@ -74,6 +103,46 @@ public Date getDate() {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	
+	public boolean isFileType() {
+		return fileType;
+	}
+
+	public void setFileType(boolean fileType) {
+		this.fileType = fileType;
+	}
+
+	public int getImageSize() {
+		return imageSize;
+	}
+
+	public void setImageSize(int imageSize) {
+		this.imageSize = imageSize;
+	}
+
+	public byte[] getImageArray() {
+		return imageArray;
+	}
+
+	public void setImageArray(byte[] imageArray) {
+		this.imageArray = imageArray;
+	}
+
+	public String getImageType() {
+		return imageType;
+	}
+
+	public void setImageType(String imageType) {
+		this.imageType = imageType;
+	}
+
+	public String getImageName() {
+		return imageName;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
 	}
 	
 	

@@ -29,20 +29,51 @@ public class Message implements Serializable{
 	@Column 
 	private String message;
 	
+//	@Column
+	private int imageSize;
+	
+//	@Column
+	private byte[] imageArray;
+	
+//	@Column
+	private String imageType;
+	
+//	@Column
+	private String imageName;
+	
 	@Column 
 	@Temporal(TemporalType.TIMESTAMP)
     private Date date;
 	
+	@Column 
+	private boolean fileType;
+	
 
-	public Message() {
+	public Message() { 
 		
 	}
 	
-	public Message(String senderName, String recipientName, String message, Date date) {
+	public Message(String senderName, String recipientName, String message, Date date ) {
 		this.senderName = senderName;
 		this.recipientName = recipientName;
 		this.message = message;
 		this.date = date;
+	}
+
+	public Message(String senderName, String recipientName, int size, byte[] imageArray, String imageType,
+			String imageName, Date date, boolean fileType) {
+		this.senderName = senderName;
+		this.recipientName = recipientName;
+		this.imageSize = size;
+		this.imageArray = imageArray;
+		this.imageType = imageType;
+		this.imageName = imageName;
+		this.date = date;
+		this.fileType = fileType;
+	}
+	
+	public Message(boolean type) {
+		this.fileType = type;
 	}
 
 	public Date getDate() {
@@ -75,6 +106,46 @@ public class Message implements Serializable{
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public boolean isFileType() {
+		return fileType;
+	}
+
+	public void setFileType(boolean fileType) {
+		this.fileType = fileType;
+	}
+
+	public int getImageSize() {
+		return imageSize;
+	}
+
+	public void setImageSize(int imageSize) {
+		this.imageSize = imageSize;
+	}
+
+	public byte[] getImageArray() {
+		return imageArray;
+	}
+
+	public void setImageArray(byte[] imageArray) {
+		this.imageArray = imageArray;
+	}
+
+	public String getImageType() {
+		return imageType;
+	}
+
+	public void setImageType(String imageType) {
+		this.imageType = imageType;
+	}
+
+	public String getImageName() {
+		return imageName;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
 	}
 	
 	
