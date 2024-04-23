@@ -129,48 +129,7 @@ public class ClientController implements Initializable {
         });
     }
     
-    public void chooseImg() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Зображення", "*.png", "*.jpg", "*.gif"));
-
-        selectedImageFile = fileChooser.showOpenDialog(null);
-        
-        if (selectedImageFile != null) {
-            try {
-                // Читання зображення з файлу в байтовий масив
-                FileInputStream fis = new FileInputStream(selectedImageFile);
-                byte[] imageBytes = new byte[(int) selectedImageFile.length()];
-                fis.read(imageBytes);
-                fis.close();
-
-                // Встановлення з'єднання з сервером
-//                Socket socket = new Socket("localhost", 12345);
-
-                // Отримання вихідного потоку для відправлення даних
-//                OutputStream outputStream = socket.getOutputStream();
-
-                // Відправлення розміру масиву
-                Date dt = new Date();
-                Message ms = new Message(name, selectedChat, imageBytes.toString(), dt);
-                outObject.write(ByteBuffer.allocate(4).putInt(imageBytes.length).array());
-
-                // Відправлення байтового масиву зображення
-                outObject.writeObject(ms);
-                outObject.flush();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (selectedImageFile != null) {
-            
-            
-        }
-     }
-    
-    
+  
     
     public void sendImage() {
     	 try {
@@ -218,8 +177,10 @@ public class ClientController implements Initializable {
 		messagePane.setMargin(pane, new Insets(6,10,10,10));
 		
 		ImageView img = new ImageView(image);
-		img.setFitWidth(300);
-		img.setFitHeight(300);
+		img.setFitWidth(400);
+		img.setFitHeight(400);
+		img.setPreserveRatio(true);
+
     	pane.setAlignment(Pos.CENTER_RIGHT);
 
 		messagePane.getChildren().add(pane);
@@ -233,9 +194,9 @@ public class ClientController implements Initializable {
     		messagePane.setMargin(pane, new Insets(6,10,10,10));
     		
     		ImageView img = new ImageView(image);
-    		img.setFitWidth(300);
-    		img.setFitHeight(300);
-//        	pane.setAlignment(Pos.CENTER_RIGHT);
+    		img.setFitWidth(400);
+    		img.setFitHeight(400);
+    		img.setPreserveRatio(true);
 
     		messagePane.getChildren().add(pane);
     		pane.getChildren().add(img);
@@ -283,7 +244,7 @@ public class ClientController implements Initializable {
     }
     
     public void addUser() {
-    	checkOnlineUsers();
+    	checkUser();
     	vbox.getChildren().clear();
     	vbox.setStyle("-fx-background-color: #2F3135");
     	for (Clients client : onlineUsers) {
@@ -412,15 +373,15 @@ public class ClientController implements Initializable {
             out.flush(); 
             out.close();
             nameSocket.close();
-            System.out.println("Ok1");
+//            System.out.println("Ok1");
 
             
             clientSocket = new Socket(IP, 4004);
-            System.out.println("Ok2");
+//            System.out.println("Ok2");
             outObject = new ObjectOutputStream(clientSocket.getOutputStream());
-            System.out.println("Ok2");
+//            System.out.println("Ok2");
 //            inObject = new ObjectInputStream(clientSocket.getInputStream());
-            System.out.println("Ok2");
+//            System.out.println("Ok2");
 
 //            statusSocket = new Socket(IP, 4003);
 //    		outStatus = new ObjectOutputStream(statusSocket.getOutputStream());
@@ -430,13 +391,13 @@ public class ClientController implements Initializable {
 //    		Message ms = new Message(name, null, "active", null);
 //    		outStatus.writeObject(ms);
 //    		outStatus.flush();
-            System.out.println("Ok4");
+//            System.out.println("Ok4");
 
 
     		
             new ReadMessage().start();    
 //            new ReadStatus().start();
-            System.out.println("Ok5");
+//            System.out.println("Ok5");
 
     	} catch (IOException e) {
             System.err.println("помилка при приєднані до сервера"+ e);
@@ -498,7 +459,7 @@ public class ClientController implements Initializable {
         }
     }
     
-    public void checkOnlineUsers() {
+    public void checkUser() {
     	
         SessionFactory factory = new Configuration()
     			.configure("hibernate.cfg.xml")
@@ -602,12 +563,12 @@ public class ClientController implements Initializable {
     		pane.setStyle(style);
     		Label messageLbl = new Label();
     		messageLbl.setText("Ви: "+ message );
-    		messageLbl.setStyle("-fx-text-fill: 2F3135; -fx-font-weight: bold;");
+    		messageLbl.setStyle("-fx-text-fill: 2F3135; -fx-font-weight: bold; -fx-font-size: 14px;");
 
-    		messageLbl.setFont(Font.font(14));
+//    		messageLbl.setFont(Font.font(14))
     		messageLbl.setMaxWidth(550);
     		messageLbl.setWrapText(true);
-    		
+
     		Label dateLbl = new Label(date);
     		dateLbl.setFont(Font.font(12));
     		dateLbl.setStyle("-fx-text-fill: #2F3135;");
@@ -645,8 +606,8 @@ public class ClientController implements Initializable {
             pane.setStyle(" -fx-padding: 15px; -fx-background-color:  #6E7888; -fx-background-radius: 25px; ");
     		Label messageLbl = new Label();
     		messageLbl.setText(senderName+ ": " + message );
-    		messageLbl.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-    		messageLbl.setFont(Font.font(14));
+    		messageLbl.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
+//    		messageLbl.setFont(Font.font(14));
 
     		messageLbl.setMaxWidth(550);
     		messageLbl.setWrapText(true);

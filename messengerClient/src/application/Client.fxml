@@ -89,9 +89,9 @@
                                              <content>
                                                 <VBox fx:id="messagePane" prefWidth="634.0" style="-fx-background-color: #2F3135;">
                                                    <children>
-                                                      <Label prefHeight="40.0" prefWidth="648.0" style="-fx-text-fill: white;" text="                                                         Вітаємо у чаті!" textAlignment="CENTER">
+                                                      <Label prefHeight="40.0" prefWidth="535.0" style="-fx-text-fill: white;" text="        Вітаємо у чаті! 🥰" textAlignment="CENTER">
                                                          <font>
-                                                            <Font name="Liberation Serif Bold" size="18.0" />
+                                                            <Font name="DejaVu Sans Bold" size="18.0" />
                                                          </font>
                                                       </Label>
                                                    </children>
