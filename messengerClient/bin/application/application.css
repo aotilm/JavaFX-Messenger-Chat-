@@ -1,0 +1,9 @@
+.custom-pane {
+    -fx-background-color: #6E7888;
+    -fx-background-radius: 20px;
+}
+
+.custom-pane:hover{
+	-fx-background-color: #5A5552;
+}
+

@@ -106,7 +106,7 @@ public class ClientController implements Initializable {
 
 
 
-    public ArrayList<Clients> onlineUsers = new ArrayList<>();
+    public ArrayList<Clients> users = new ArrayList<>();
     public ArrayList<Message> history = new ArrayList<>();
     public ArrayList<Message> activeUsers = new ArrayList<>();
 
@@ -247,7 +247,7 @@ public class ClientController implements Initializable {
     	checkUser();
     	vbox.getChildren().clear();
     	vbox.setStyle("-fx-background-color: #2F3135");
-    	for (Clients client : onlineUsers) {
+    	for (Clients client : users) {
     		if(!client.getName().equals(name)) {
     			Platform.runLater(() -> {
     				HBox pane = new HBox();
@@ -471,9 +471,9 @@ public class ClientController implements Initializable {
 
             Query<Clients> query = session.createQuery("FROM Clients ", Clients.class);
 //            WHERE activeStatus = true
-            onlineUsers.clear();
-            onlineUsers.addAll(query.list());
-            System.out.println(onlineUsers);
+            users.clear();
+            users.addAll(query.list());
+            System.out.println(users);
             session.getTransaction().commit();
         }finally {
             session.close();
