@@ -128,7 +128,7 @@ public class ClientController implements Initializable {
             }
         });
     }
-    
+//    перевіряю 
   
     
     public void sendImage() {
