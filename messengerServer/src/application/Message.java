@@ -3,66 +3,72 @@ package application;
 import java.io.Serializable;
 import java.util.Date;
 
- 
-//import javax.persistence.Column;
-//import javax.persistence.Entity;
-//import javax.persistence.GeneratedValue;
-//import javax.persistence.GenerationType;
-//import javax.persistence.Id;
-//import javax.persistence.Table;
-//import javax.persistence.Temporal;
-//import javax.persistence.TemporalType;
-//
-//@Entity
-//@Table(name = "History")
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+@Entity
+@Table(name = "History")
 public class Message implements Serializable{
-public Date getDate() {
-		return date;
-	}
-
-	public void setDate(Date date) {
-		this.date = date;
-	}
-
-	//	@Id
-//	@GeneratedValue(strategy=GenerationType.IDENTITY)
-//	@Column
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column
 	private int id;
 	
-//	@Column 
+	@Column 
 	private String senderName;
 	
-//	@Column 
+	@Column 
 	private String recipientName;
 	
-//	@Column 
+	@Column 
 	private String message;
 	
+	@Column
 	private int imageSize;
 	
+	@Column
 	private byte[] imageArray;
 	
+	@Column
 	private String imageType;
 	
+	@Column
 	private String imageName;
 	
-//	@Column 
-//	@Temporal(TemporalType.TIMESTAMP)
+	@Column 
+	@Temporal(TemporalType.TIMESTAMP)
     private Date date;
-     
+	
+	@Column 
 	private boolean fileType;
 	
-	public Message() {
+
+	public Message() { 
 		
 	}
-    
-	public Message(String senderName, String recipientName, String message, Date date) {
+	
+	public Message(String message) {
+		this.message = message;
+	}
+	
+	
+	public Message(String senderName, String recipientName) {
+		this.senderName = senderName;
+		this.recipientName = recipientName;
+	}
+	
+	public Message(String senderName, String recipientName, String message, Date date ) {
 		this.senderName = senderName;
 		this.recipientName = recipientName;
 		this.message = message;
 		this.date = date;
 	}
-
 
 	public Message(String senderName, String recipientName, int size, byte[] imageArray, String imageType,
 			String imageName, Date date, boolean fileType) {
@@ -80,7 +86,14 @@ public Date getDate() {
 		this.fileType = type;
 	}
 
+	public Date getDate() {
+		return date;
+	}
 
+	public void setDate(Date date) {
+		this.date = date;
+	}
+	
 	public String getSenderName() {
 		return senderName;
 	}
@@ -104,7 +117,7 @@ public Date getDate() {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
+
 	public boolean isFileType() {
 		return fileType;
 	}

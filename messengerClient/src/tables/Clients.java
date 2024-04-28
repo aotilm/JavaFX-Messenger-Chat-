@@ -1,24 +1,13 @@
 package tables;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import java.io.Serializable;
 
-@Entity
-@Table
-public class Clients {
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column
+public class Clients implements Serializable {
+
 	private int id;
 	
-	@Column 
 	private String name;
 	
-	@Column
 	private boolean activeStatus;
 	
 	public Clients() {
@@ -34,7 +23,7 @@ public class Clients {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(int id) {  
 		this.id = id;
 	}
 

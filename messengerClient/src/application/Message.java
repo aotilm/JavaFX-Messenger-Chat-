@@ -12,45 +12,40 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-@Entity
-@Table(name = "History")
 public class Message implements Serializable{
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column
+
 	private int id;
-	
-	@Column 
+	 
 	private String senderName;
 	
-	@Column 
 	private String recipientName;
 	
-	@Column 
 	private String message;
 	
-//	@Column
 	private int imageSize;
 	
-//	@Column
 	private byte[] imageArray;
 	
-//	@Column
 	private String imageType;
 	
-//	@Column
 	private String imageName;
 	
-	@Column 
-	@Temporal(TemporalType.TIMESTAMP)
     private Date date;
 	
-	@Column 
 	private boolean fileType;
 	
 
 	public Message() { 
 		
+	}
+	
+	public Message(String message) {
+		this.message = message;
+	}
+	
+	public Message(String senderName, String recipientName) {
+		this.senderName = senderName;
+		this.recipientName = recipientName;
 	}
 	
 	public Message(String senderName, String recipientName, String message, Date date ) {

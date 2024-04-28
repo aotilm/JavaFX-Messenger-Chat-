@@ -9,7 +9,6 @@ import org.hibernate.query.Query;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import tables.Clients;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.fxml.FXMLLoader;
@@ -26,18 +25,28 @@ public class Main extends Application {
 			primaryStage.show();
 			primaryStage.setOnCloseRequest(event -> {
 			    try {
-			        if (ClientController.clientSocket != null && !ClientController.clientSocket.isClosed()) {
-			            ClientController.clientSocket.close();
+			        if (ClientController.messageSocket != null && !ClientController.messageSocket.isClosed()) {
+			            ClientController.messageSocket.close();
+			        } 
+			        
+			        if (ClientController.serviceSocket != null && !ClientController.serviceSocket.isClosed()) {
+			            ClientController.serviceSocket.close();
+			        } 
+			        if (ClientController.messageIn != null) {
+			            ClientController.messageIn.close();
 			        }
-			        if (ClientController.inObject != null) {
-			            ClientController.inObject.close();
+			        if (ClientController.messageOut != null) {
+			            ClientController.messageOut.close();
 			        }
-			        if (ClientController.outObject != null) {
-			            ClientController.outObject.close();
+			        if (ClientController.serviceIn != null) {
+			            ClientController.serviceIn.close();
 			        }
-			        if (!ClientController.name.isEmpty()) {
-			            ClientController.updateActiveStatus(ClientController.name, false);
+			        if (ClientController.serviceOut != null) {
+			            ClientController.serviceOut.close();
 			        }
+//			        if (!ClientController.name.isEmpty())  {
+//			            ClientController.updateActiveStatus(ClientController.name, false);
+//			        }
 			    } catch (IOException e) { 
 			        System.err.println(e);
 			    } finally {
