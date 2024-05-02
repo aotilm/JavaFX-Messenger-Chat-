@@ -79,7 +79,7 @@ public class ClientController implements Initializable {
     private VBox vbox, messagePane; 
 
     @FXML
-    private Label number, chatStatusLabel, chatNameLabel, registrationLbl;
+    private Label number, chatStatusLabel, chatNameLabel, registrationLbl, enterLabel;
     
     @FXML
     private TextField textMessage, textName;
@@ -365,7 +365,7 @@ public class ClientController implements Initializable {
     	}
     	else { 
     		textName.clear();
-    		textName.setPromptText("Вам слід зареєструватись!");
+    		enterLabel.setText("Вам слід зареєструватись!");
     	}
     }
    
@@ -571,7 +571,7 @@ public class ClientController implements Initializable {
 
                         System.out.println("Received " + image.getHeight() + "x" + image.getWidth() + ": " + System.currentTimeMillis());
                         
-                        ImageIO.write(image, imageMsg.getImageType(), new File("/home/illyusha/Pictures/"+imageMsg.getImageName()+"."+ imageMsg.getImageType()));
+//                        ImageIO.write(image, imageMsg.getImageType(), new File("/home/illyusha/Pictures/"+imageMsg.getImageName()+"."+ imageMsg.getImageType()));
                         drawImageMessage(imageArray);
 
                 	}

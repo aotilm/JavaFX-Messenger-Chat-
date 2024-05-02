@@ -1,89 +1,56 @@
 package application;
-
-import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
+
+import tables.Files;
+import tables.Text;
 
 @Entity
 @Table(name = "History")
-public class Message implements Serializable{
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column
-	private int id;
-	
-	@Column 
-	private String senderName;
-	
-	@Column 
-	private String recipientName;
-	
-	@Column 
-	private String message;
-	
-	@Column
-	private int imageSize;
-	
-	@Column
-	private byte[] imageArray;
-	
-	@Column
-	private String imageType;
-	
-	@Column
-	private String imageName;
-	
-	@Column 
+public class Message {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private int id;
+
+    @Column 
 	@Temporal(TemporalType.TIMESTAMP)
     private Date date;
-	
-	@Column 
-	private boolean fileType;
-	
 
-	public Message() { 
-		
-	}
-	
-	public Message(String message) {
-		this.message = message;
-	}
-	
-	
-	public Message(String senderName, String recipientName) {
-		this.senderName = senderName;
-		this.recipientName = recipientName;
-	}
-	
-	public Message(String senderName, String recipientName, String message, Date date ) {
-		this.senderName = senderName;
-		this.recipientName = recipientName;
-		this.message = message;
+    @Column(name = "recipientName")
+    private String recipientName;
+
+    @Column(name = "senderName")
+    private String senderName;
+
+    @OneToOne
+    @JoinColumn(name = "fileID", unique = true)
+    private Files files;
+
+    @OneToOne
+    @JoinColumn(name = "textID", unique = true)
+    private Text text;
+
+    public Message() {
+    	
+    }
+    
+	public Message(Date date, String recipientName, String senderName, Files file, Text text) {
 		this.date = date;
+		this.recipientName = recipientName;
+		this.senderName = senderName;
+		this.files = file;
+		this.text = text;
 	}
 
-	public Message(String senderName, String recipientName, int size, byte[] imageArray, String imageType,
-			String imageName, Date date, boolean fileType) {
-		this.senderName = senderName;
-		this.recipientName = recipientName;
-		this.imageSize = size;
-		this.imageArray = imageArray;
-		this.imageType = imageType;
-		this.imageName = imageName;
-		this.date = date;
-		this.fileType = fileType;
+	public int getId() {
+		return id;
 	}
-	
-	public Message(boolean type) {
-		this.fileType = type;
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public Date getDate() {
@@ -92,14 +59,6 @@ public class Message implements Serializable{
 
 	public void setDate(Date date) {
 		this.date = date;
-	}
-	
-	public String getSenderName() {
-		return senderName;
-	}
-
-	public void setSenderName(String senderName) {
-		this.senderName = senderName;
 	}
 
 	public String getRecipientName() {
@@ -110,54 +69,30 @@ public class Message implements Serializable{
 		this.recipientName = recipientName;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getSenderName() {
+		return senderName;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setSenderName(String senderName) {
+		this.senderName = senderName;
 	}
 
-	public boolean isFileType() {
-		return fileType;
+	public Files getFile() {
+		return files;
 	}
 
-	public void setFileType(boolean fileType) {
-		this.fileType = fileType;
+	public void setFile(Files file) {
+		this.files = file;
 	}
 
-	public int getImageSize() {
-		return imageSize;
+	public Text getText() {
+		return text;
 	}
 
-	public void setImageSize(int imageSize) {
-		this.imageSize = imageSize;
+	public void setText(Text text) {
+		this.text = text;
 	}
 
-	public byte[] getImageArray() {
-		return imageArray;
-	}
-
-	public void setImageArray(byte[] imageArray) {
-		this.imageArray = imageArray;
-	}
-
-	public String getImageType() {
-		return imageType;
-	}
-
-	public void setImageType(String imageType) {
-		this.imageType = imageType;
-	}
-
-	public String getImageName() {
-		return imageName;
-	}
-
-	public void setImageName(String imageName) {
-		this.imageName = imageName;
-	}
 	
-	
-	
+    
 }
