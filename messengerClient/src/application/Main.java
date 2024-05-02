@@ -23,6 +23,7 @@ public class Main extends Application {
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(scene);
 			primaryStage.show();
+			primaryStage.setTitle("GODDAAMN Chat");
 			primaryStage.setOnCloseRequest(event -> {
 			    try {
 			        if (ClientController.messageSocket != null && !ClientController.messageSocket.isClosed()) {
@@ -32,6 +33,11 @@ public class Main extends Application {
 			        if (ClientController.serviceSocket != null && !ClientController.serviceSocket.isClosed()) {
 			            ClientController.serviceSocket.close();
 			        } 
+			        
+			        if (ClientController.statusSocket != null && !ClientController.statusSocket.isClosed()) {
+			            ClientController.statusSocket.close();
+			        } 
+			        
 			        if (ClientController.messageIn != null) {
 			            ClientController.messageIn.close();
 			        }
@@ -44,9 +50,10 @@ public class Main extends Application {
 			        if (ClientController.serviceOut != null) {
 			            ClientController.serviceOut.close();
 			        }
-//			        if (!ClientController.name.isEmpty())  {
-//			            ClientController.updateActiveStatus(ClientController.name, false);
-//			        }
+
+			        if (ClientController.statusIn != null) {
+			            ClientController.statusIn.close();
+			        }
 			    } catch (IOException e) { 
 			        System.err.println(e);
 			    } finally {

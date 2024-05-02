@@ -57,6 +57,8 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -96,7 +98,9 @@ public class ClientController implements Initializable {
 
     public static Socket messageSocket; 
     public static Socket serviceSocket; 
+    public static Socket statusSocket;
 
+    public static ObjectInputStream statusIn;
     public static ObjectInputStream messageIn;
     public static ObjectOutputStream messageOut;
     
@@ -109,13 +113,14 @@ public class ClientController implements Initializable {
 
     public ArrayList<Clients> users = new ArrayList<>();
     public ArrayList<Message> history = new ArrayList<>();
-    public ArrayList<Message> activeUsers = new ArrayList<>();
+    public ArrayList<Clients> activeUsers = new ArrayList<>();
 
-    private String IP = "localhost";
+    private String IP = "192.168.0.104";
         
     public static String name;
     public String selectedChat;
     private File selectedImageFile;
+    
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -258,6 +263,7 @@ public class ClientController implements Initializable {
     public void addUser() {
     	selectAllUsers();
     	vbox.getChildren().clear();
+
     	vbox.setStyle("-fx-background-color: #2F3135");
     	for (Clients client : users) {
     		if(!client.getName().equals(name)) {
@@ -274,14 +280,20 @@ public class ClientController implements Initializable {
     	    	    avatar.setFitWidth(50);
     	    	    avatar.setFitHeight(50);    	    	    
     	    	    
-    	    	    Label l = new Label(client.getName());
-    	    	    l.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;");
-    	    	    l.setLayoutY(20);
-    	    	    l.setLayoutX(50);
+    	    	    Label chatName = new Label(client.getName());
+    	    	    chatName.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px;");
+    	    	    chatName.setLayoutY(20);
+    	    	    chatName.setLayoutX(50);
     	    	    pane.setMargin(avatar , new Insets(10));
     	    	    
+    	    	    Circle status = new Circle(); 
+    	            status.setRadius(5); 
+    	            status.setFill(Color.GREEN); 
+    	            status.setVisible(false);
+    	            
+    	    	    
     	    	    vbox.getChildren().add(pane); 
-    	    	    pane.getChildren().addAll(avatar, l);	
+    	    	    pane.getChildren().addAll(avatar, chatName, status);	
     	    	        	    	    
     	    	    pane.setOnMouseEntered(event -> {
     	    	    	String currentColor = pane.getStyle();
@@ -359,21 +371,19 @@ public class ClientController implements Initializable {
    
     public void connectToServer() {
     	try{
-    		System.out.println(1);
     		serviceSocket =  new Socket(IP,4005);
-    		System.out.println(2);
     		serviceOut = new ObjectOutputStream(serviceSocket.getOutputStream());
-    		System.out.println(3);
             
             messageSocket = new Socket(IP, 4004);
-            System.out.println(5);
 			messageOut = new ObjectOutputStream(messageSocket.getOutputStream());
-			System.out.println(6);
+			
+			statusSocket = new Socket(IP, 4003);
 	        new ReadMessage().start(); 
-	        System.out.println("підключилось");
+	        new ActiveStatusReader().start();
 	        
-            serviceIn = new ObjectInputStream(serviceSocket.getInputStream());  
-            System.out.println(4);
+            serviceIn = new ObjectInputStream(serviceSocket.getInputStream()); 
+            
+	        System.out.println("підключилось");
 
     	} catch (IOException e) {
             System.err.println("помилка при приєднані до сервера"+ e);
@@ -441,32 +451,6 @@ public class ClientController implements Initializable {
 	}
     }
    
-    public static void updateActiveStatus(String name, boolean activeStatus) {
-    	SessionFactory factory = new Configuration()
-                .configure("hibernate.cfg.xml")
-                .addAnnotatedClass(Clients.class)
-                .buildSessionFactory();
-             Session session = factory.getCurrentSession();
-        try  {
-
-            session.beginTransaction();
-
-            Query<Clients> query = session.createQuery("UPDATE Clients SET activeStatus = ?1 WHERE name = ?2");
-            query.setParameter(1, activeStatus);
-            query.setParameter(2, name);
-         
-            query.executeUpdate();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-        	session.close();
-            factory.close();
-            e.printStackTrace();
-        }finally {
-        	session.close();
-          factory.close();
-        }
-    }
-  
     public void importUsersMessage(String message, Date date, boolean fileType) {
     	Platform.runLater(() -> {
     		Message ms = new Message(name, selectedChat, message, date);
@@ -505,7 +489,7 @@ public class ClientController implements Initializable {
     		messageLbl.setStyle("-fx-text-fill: 2F3135; -fx-font-weight: bold; -fx-font-size: 14px;");
 
 //    		messageLbl.setFont(Font.font(14))
-    		messageLbl.setMaxWidth(550);
+    		messageLbl.setMaxWidth(500);
     		messageLbl.setWrapText(true);
 
     		Label dateLbl = new Label(date);
@@ -548,7 +532,7 @@ public class ClientController implements Initializable {
     		messageLbl.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
 //    		messageLbl.setFont(Font.font(14));
 
-    		messageLbl.setMaxWidth(550);
+    		messageLbl.setMaxWidth(500);
     		messageLbl.setWrapText(true);
     		
     		Label dateLbl = new Label(date);
@@ -609,5 +593,87 @@ public class ClientController implements Initializable {
             }
         }
     }
+    
+    
+    private class ActiveStatusReader extends Thread{
+      	 @Override
+           public void run() {
+             try {
+				statusIn = new ObjectInputStream(statusSocket.getInputStream());
+				int listSize;
+				 while((listSize  = (int) statusIn.readObject()) != -1) {
+	      			 try {
+						activeUsers.clear();
 
+						for(int i=0; i<listSize; i++) {
+							Clients activeClient = (Clients) statusIn.readObject();
+							activeUsers.add(activeClient);
+
+						}
+						System.out.println("--------------------------------------");
+						System.out.println(activeUsers.toString());
+						System.out.println("--------------------------------------");
+						changeStatus();
+					} catch (ClassNotFoundException | IOException e) {
+						e.printStackTrace();
+					}
+	      		 }
+			} catch (IOException | ClassNotFoundException e) {
+				ActiveStatusReader.this.stop();
+				e.printStackTrace();
+			}       		
+      	 }
+      	 
+      	public void changeStatus() {
+      		Platform.runLater(() -> {
+      			for (Node node : vbox.getChildren()) {
+          	        if (node instanceof HBox) {
+          	            HBox hbox = (HBox) node;
+          	            Label chatNameLabel = null;
+          	            Circle statusCircle = null;
+
+          	            for (Node hboxNode : hbox.getChildren()) {
+          	                if (hboxNode instanceof Circle) {
+          	                    statusCircle = (Circle) hboxNode;
+          	                    statusCircle.setVisible(false); 
+          	                } else if (hboxNode instanceof Label) {
+          	                    Label label = (Label) hboxNode;
+          	                    for (int i = 0; i < activeUsers.size(); i++) {
+          	                        Clients client = activeUsers.get(i);
+          	                        if (client.getName().equals(label.getText())) {
+          	                            chatNameLabel = label;
+          	                            break;
+          	                        }
+          	                    }
+          	                }
+          	            }
+          	            if (chatNameLabel != null && statusCircle != null) {
+          	                statusCircle.setVisible(true);
+          	            }
+          	        }
+          	    }
+          	    
+          	  
+          	  
+          		for (int i = 0; i < activeUsers.size(); i++) {
+            		Clients client = activeUsers.get(i);
+            		if(client.getName().equals(selectedChat)) {
+            			chatStatusLabel.setText("У мережі");
+            			break;
+            		}
+            		else {
+            			chatStatusLabel.setText("Не в мережі :(");
+            		}
+            	}
+
+        	 });
+      	    
+      	    
+      	  
+      	  
+      	}
+
+      	 
+      	 
+    }
 }

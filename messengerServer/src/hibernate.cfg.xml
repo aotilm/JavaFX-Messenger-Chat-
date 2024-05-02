@@ -9,7 +9,7 @@
     <!-- property name="connection.driver_class">com.mysql.jdbc.Driver</property -->
     <property name="connection.url">jdbc:mysql://localhost/messenger</property>
     <property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>
-    <property name="connection.username">root</property>
+    <property name="connection.username">ilya</property>
     <property name="connection.password">123456</property>
     <property name="connection.pool_size">3</property>
     <!--property name="dialect">org.hibernate.dialect.MySQLDialect</property-->

@@ -49,16 +49,27 @@ class Server {
         try  {
         	ServerSocket enterServerSocket = new ServerSocket(4005);
         	ServerSocket messageServerSocket = new ServerSocket(4004);
-            Socket enterSocket;
+        	ServerSocket statusServerSocket = new ServerSocket(4003); 
+            Socket serviceSocket;
             Socket messageSocket;
+            Socket statusSocket;
 
             System.out.println("Сервер запущений!");
+            ActiveStatusReader reader = new ActiveStatusReader(this);
+            new Thread(reader).start();
 
             while (true) {
-            	enterSocket = enterServerSocket.accept();
-            	messageSocket = messageServerSocket.accept();
-                ClientHandler client = new ClientHandler(enterSocket, this, messageSocket);
-                new Thread(client).start();
+            	try  {
+            		serviceSocket = enterServerSocket.accept();
+                	messageSocket = messageServerSocket.accept();
+                	statusSocket = statusServerSocket.accept();
+                	
+                    ClientHandler client = new ClientHandler(serviceSocket, this, messageSocket, statusSocket);
+                    new Thread(client).start();
+            	}catch (IOException e) {
+                    System.err.println(e);
+                    
+                }
             }
         } catch (IOException e) {
             System.err.println(e);
@@ -85,7 +96,7 @@ class Server {
             }
 
     	}
-    	
+    	    	
     	else {
     		for (ClientHandler client : clients) {
                 if (client.getName().equals(recipient)) {
@@ -97,6 +108,19 @@ class Server {
     	
     	
     }
+    
+    public void sendStatusToAll(int size) {
+    	for (ClientHandler client : clients) {
+            client.sendActiveSize(size);
+        }
+    	
+    	for (ClientHandler client : clients) {
+    		for(int i = 0; i<ActiveStatusReader.activeUsers.size(); i++) {
+        		Clients activeClient = ActiveStatusReader.activeUsers.get(i); 
+                client.sendActiveList(activeClient);;
+        	}
+        } 
+	}
     
     public void addClient(ClientHandler client) {
         clients.add(client);
@@ -112,35 +136,42 @@ class Server {
 class ClientHandler implements Runnable {
 	private Server server;
 	
-	private Socket enterSocket;
+	private Socket serviceSocket;
 	private Socket messageSocket;
 	
-    private ObjectInputStream enterIn;
+	
+    private ObjectInputStream serviceIn;
     private ObjectInputStream messageIn;
 
-    private ObjectOutputStream enterOut;
+    private ObjectOutputStream serviceOut;
     private ObjectOutputStream messageOut;
+    
+    private Socket statusSocket;
+    private ObjectOutputStream statusOut;
 
-    ImportHistoryReader importReader;
     public String name;
 
     public ArrayList<Clients> users = new ArrayList<>();
     public ArrayList<Message> history = new ArrayList<>();
 
-
+    ImportHistoryReader importReader;
+    ActiveStatusReader statusReader;
     
-
-
-    public ClientHandler(Socket socket, Server server, Socket msgSocket) {
+    public ClientHandler(Socket socket, Server server, Socket msgSocket, Socket stSocket) {
         try {
-        	this.enterSocket = socket;
+        	this.serviceSocket = socket;
         	this.server = server;
-			this.enterOut = new ObjectOutputStream(enterSocket.getOutputStream());
-			this.enterIn = new ObjectInputStream(enterSocket.getInputStream());
+			this.serviceOut = new ObjectOutputStream(serviceSocket.getOutputStream());
+			this.serviceIn = new ObjectInputStream(serviceSocket.getInputStream());
 			
 			this.messageSocket = msgSocket;
 			this.messageIn = new ObjectInputStream(messageSocket.getInputStream());
 			this.messageOut = new ObjectOutputStream(messageSocket.getOutputStream());
+			
+			this.statusSocket = stSocket;
+			this.statusOut = new ObjectOutputStream(statusSocket.getOutputStream());
+			
+			
 		    System.out.println("Конструктор відпрацював");
 
 		} catch (IOException e) {
@@ -153,7 +184,7 @@ class ClientHandler implements Runnable {
     public void run() {
         try {
         	EnterOrReg enterResponse;
-        	while ((enterResponse = (EnterOrReg) enterIn.readObject()) != null) {
+        	while ((enterResponse = (EnterOrReg) serviceIn.readObject()) != null) {
     			name = enterResponse.getName();
         		if(!enterResponse.isType()) {
         			if(clientEnter(name)) {
@@ -180,9 +211,9 @@ class ClientHandler implements Runnable {
         	}
 
 
-//        	new ImportHistoryReader().start();
         	importReader = new ImportHistoryReader();
         	importReader.start();
+        	
         	updateActiveStatus(name, true);
 
         	Message response;
@@ -230,8 +261,8 @@ class ClientHandler implements Runnable {
             session.getTransaction().commit();
             
             try {
-				enterOut.writeObject(result);
-				enterOut.flush();
+				serviceOut.writeObject(result);
+				serviceOut.flush();
 				System.out.println(selectedChat + result);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -266,13 +297,13 @@ class ClientHandler implements Runnable {
          }
          
          try {
-			enterOut.writeObject(history.size());
-			enterOut.flush();
+			serviceOut.writeObject(history.size());
+			serviceOut.flush();
 	         
 	        for(int i=0; i<history.size(); i++) {
 	        	 Message hs = history.get(i);
-	        	 enterOut.writeObject(hs);
-	        	 enterOut.flush();
+	        	 serviceOut.writeObject(hs);
+	        	 serviceOut.flush();
 	         }
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -327,7 +358,7 @@ class ClientHandler implements Runnable {
 	public void selectAllUser() {
     	try {
 
-			if(enterIn.readObject().equals("SelectUsers")) {
+			if(serviceIn.readObject().equals("SelectUsers")) {
 				SessionFactory factory = new Configuration()
 		    			.configure("hibernate.cfg.xml")
 		    			.addAnnotatedClass(Clients.class) 
@@ -345,22 +376,20 @@ class ClientHandler implements Runnable {
 		            session.close();
 		            factory.close();
 		        }
-		        enterOut.writeObject(users.size());
-				enterOut.flush();
+		        serviceOut.writeObject(users.size());
+				serviceOut.flush();
 
 		        for(int i=0; i<users.size(); i++) {
 		        	Clients client = users.get(i);
-		        	enterOut.writeObject(client);
-					enterOut.flush();
+		        	serviceOut.writeObject(client);
+					serviceOut.flush();
 		        }
 			       System.out.println("метод імпорту клієнтів");
 
 			}
 		} catch (IOException | HibernateException | ClassNotFoundException e) {
 			e.printStackTrace();
-		} 
-    	
-        
+		}        
     }
 	
 	public boolean clientEnter(String name) {
@@ -379,8 +408,8 @@ class ClientHandler implements Runnable {
     
             session.getTransaction().commit();
 			try {
-	            enterOut.writeObject(result);
-				enterOut.flush();
+	            serviceOut.writeObject(result);
+				serviceOut.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -410,8 +439,8 @@ class ClientHandler implements Runnable {
 					System.out.println("Done!!!");
 					session.getTransaction().commit();
 					
-					enterOut.writeObject(true);
-					enterOut.flush();
+					serviceOut.writeObject(true);
+					serviceOut.flush();
 
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -422,9 +451,9 @@ class ClientHandler implements Runnable {
     public void close() {
     	try {
     		
-            enterIn.close();
-            enterOut.close();
-            enterSocket.close();
+            serviceIn.close();
+            serviceOut.close();
+            serviceSocket.close();
                         
             messageIn.close();
             messageOut.close();
@@ -436,6 +465,23 @@ class ClientHandler implements Runnable {
         }
     }
 
+	 public void sendActiveSize(int size) {
+         try {
+         	statusOut.writeObject(size);
+         	statusOut.flush();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+     }
+     
+     public void sendActiveList(Clients activeClient) {
+         try {
+         	statusOut.writeObject(activeClient);
+         	statusOut.flush();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+     }
     
     public void sendMessage(Message ms) {
         try {
@@ -445,7 +491,7 @@ class ClientHandler implements Runnable {
             e.printStackTrace();
         }
     }
-
+    
 	public String getName() {
 		return name;
 	}
@@ -455,21 +501,13 @@ class ClientHandler implements Runnable {
          public void run() {
     		 try {
     			 Message ms;
-        		 while((ms = (Message) enterIn.readObject()) != null) {
+        		 while((ms = (Message) serviceIn.readObject()) != null) {
         			 if(ms.getMessage().equals("ImportHistory")) {
-        				 Message rs = (Message) enterIn.readObject();
+        				 Message rs = (Message) serviceIn.readObject();
         				 importHistory(rs);
-        				 Message rss = (Message) enterIn.readObject();
+        				 Message rss = (Message) serviceIn.readObject();
         				 checkIfUserIsOnline(rss.getMessage());
         			 }
-        			 
-//        			 if(ms.getMessage().equals("SelectStatus")) {
-//        				 System.out.println(7);
-//        				 Message rs = (Message) enterIn.readObject();
-//        				 System.out.println(8);
-//        				 checkIfUserIsOnline(rs.getRecipientName());
-//        				 System.out.println(9);
-//        			 }
     				 
         		 	}
 				} catch (ClassNotFoundException | IOException e) {
@@ -479,3 +517,48 @@ class ClientHandler implements Runnable {
     	 }
     }
 }
+
+
+class ActiveStatusReader implements Runnable{
+    public static ArrayList<Clients> activeUsers = new ArrayList<>();
+
+   
+    private Server server;
+    
+    public ActiveStatusReader(Server server) {
+		this.server = server;
+    }
+    
+  	 @Override
+       public void run() {
+  		 while(true) {
+  			try {
+  				selectActiveUsers();
+  	   			server.sendStatusToAll(activeUsers.size());
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+  		 }
+  	 }
+  	 
+  	 
+ 	public void selectActiveUsers() {
+		SessionFactory factory = new Configuration()
+    			.configure("hibernate.cfg.xml")
+    			.addAnnotatedClass(Clients.class) 
+    			.buildSessionFactory();  
+    	Session session = factory.openSession();
+        try {
+            session.beginTransaction();
+
+            Query<Clients> query = session.createQuery("FROM Clients WHERE activeStatus = true", Clients.class);
+            activeUsers.clear();
+            activeUsers.addAll(query.list());
+            session.getTransaction().commit();
+        }finally {
+            session.close();
+            factory.close();
+        }
+    }
+  }
