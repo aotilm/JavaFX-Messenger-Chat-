@@ -23,7 +23,7 @@ public class Main extends Application {
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(scene);
 			primaryStage.show();
-			primaryStage.setTitle("GODDAAMN Chat");
+			primaryStage.setTitle("Chat");
 			primaryStage.setOnCloseRequest(event -> {
 			    try {
 			        if (ClientController.messageSocket != null && !ClientController.messageSocket.isClosed()) {

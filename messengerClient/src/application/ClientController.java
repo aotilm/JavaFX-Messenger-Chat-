@@ -115,7 +115,7 @@ public class ClientController implements Initializable {
     public ArrayList<Message> history = new ArrayList<>();
     public ArrayList<Clients> activeUsers = new ArrayList<>();
 
-    private String IP = "192.168.0.104";
+    private String IP = "localhost";
         
     public static String name;
     public String selectedChat;

@@ -20,26 +20,6 @@
          <children>
             <StackPane prefHeight="150.0">
                <children>
-                  <AnchorPane fx:id="singInPane" style="-fx-background-color: #2F3135;">
-                     <children>
-                        <TextField fx:id="textName" layoutX="353.0" layoutY="253.0" prefHeight="45.0" prefWidth="246.0" promptText="Наприклад: &quot;Андрій&quot;" style="-fx-background-color: #5A5552; -fx-background-radius: 20px; -fx-text-fill: white; -fx-font-size: 18px; -fx-alignment: center; -fx-font-weight: bold;" />
-                        <Label layoutX="362.0" layoutY="212.0" text="Введіть ваше ім'я" textFill="WHITE">
-                           <font>
-                              <Font name="System Bold" size="22.0" />
-                           </font>
-                        </Label>
-                        <Button fx:id="btnGoChat" layoutX="386.0" layoutY="316.0" mnemonicParsing="false" onAction="#userAuthentication" style="-fx-background-radius: 20px; -fx-background-color: #6E7888; -fx-text-fill: white;" text="Увійти до чату">
-                           <font>
-                              <Font name="System Bold" size="18.0" />
-                           </font>
-                        </Button>
-                        <Label fx:id="registrationLbl" layoutX="417.0" layoutY="361.0" onMouseClicked="#clientRegistration" text="Зареєструватись" textFill="WHITE">
-                           <font>
-                              <Font name="System Italic" size="13.0" />
-                           </font>
-                        </Label>
-                     </children>
-                  </AnchorPane>
                   <BorderPane fx:id="chatPane" prefHeight="200.0">
                      <left>
                         <BorderPane prefHeight="700.0" prefWidth="300.0" style="-fx-background-color: #6E7888; -fx-border-width: 0 2px 0 0;" BorderPane.alignment="CENTER">
@@ -132,6 +112,27 @@
                         </BorderPane>
                      </center>
                   </BorderPane>
+                  <AnchorPane fx:id="singInPane" style="-fx-background-color: #2F3135;">
+                     <children>
+                        <TextField fx:id="textName" layoutX="226.0" layoutY="238.0" prefHeight="45.0" prefWidth="246.0" promptText="Логін" style="-fx-background-color: #5A5552; -fx-background-radius: 20px; -fx-text-fill: white; -fx-font-size: 18px; -fx-alignment: center; -fx-font-weight: bold;" />
+                        <Label layoutX="444.0" layoutY="188.0" text="Вхід" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="22.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="btnGoChat" layoutX="386.0" layoutY="301.0" mnemonicParsing="false" onAction="#userAuthentication" style="-fx-background-radius: 20px; -fx-background-color: #6E7888; -fx-text-fill: white;" text="Увійти до чату">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Button>
+                        <Label fx:id="registrationLbl" layoutX="417.0" layoutY="346.0" onMouseClicked="#clientRegistration" text="Зареєструватись" textFill="WHITE">
+                           <font>
+                              <Font name="System Italic" size="13.0" />
+                           </font>
+                        </Label>
+                        <TextField layoutX="479.0" layoutY="238.0" prefHeight="45.0" prefWidth="246.0" promptText="Пароль" style="-fx-background-color: #5A5552; -fx-background-radius: 20px; -fx-text-fill: white; -fx-font-size: 18px; -fx-alignment: center; -fx-font-weight: bold;" />
+                     </children>
+                  </AnchorPane>
                </children>
             </StackPane>
          </children>
