@@ -1,12 +1,6 @@
 package application;
 	
 import java.io.IOException;
-
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.query.Query;
-
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -68,5 +62,6 @@ public class Main extends Application {
 	
 	public static void main(String[] args) {
 		launch(args);
+
 	}
 }

@@ -26,10 +26,6 @@ import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.query.Query;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -115,7 +111,7 @@ public class ClientController implements Initializable {
     public ArrayList<Message> history = new ArrayList<>();
     public ArrayList<Clients> activeUsers = new ArrayList<>();
 
-    private String IP = "192.168.0.104";
+    private String IP = "localhost";
         
     public static String name;
     public String selectedChat;
@@ -178,19 +174,24 @@ public class ClientController implements Initializable {
     }
 
     public void drawUserImageMessage(byte[] imageArray) {
-    	Image image = new Image(new ByteArrayInputStream(imageArray));
-        VBox pane = new VBox();
-		messagePane.setMargin(pane, new Insets(6,10,10,10));
-		
-		ImageView img = new ImageView(image);
-		img.setFitWidth(400);
-		img.setFitHeight(400);
-		img.setPreserveRatio(true);
+    	Platform.runLater(() -> {
+    		Image image = new Image(new ByteArrayInputStream(imageArray));
+            VBox pane = new VBox();
+    		messagePane.setMargin(pane, new Insets(6,10,10,10));
+    		
+    		ImageView img = new ImageView(image);
+    		img.setFitWidth(400);
+    		img.setFitHeight(400);
+    		img.setPreserveRatio(true);
 
-    	pane.setAlignment(Pos.CENTER_RIGHT);
+        	pane.setAlignment(Pos.CENTER_RIGHT);
 
-		messagePane.getChildren().add(pane);
-		pane.getChildren().add(img);
+    		messagePane.getChildren().add(pane);
+    		pane.getChildren().add(img);
+    		new animatefx.animation.ZoomInLeft(img).setSpeed(2.0).play();
+    	});
+    	
+
     }
     
     public void drawImageMessage(byte[] imageArray) {
@@ -206,6 +207,8 @@ public class ClientController implements Initializable {
 
     		messagePane.getChildren().add(pane);
     		pane.getChildren().add(img);
+    		new animatefx.animation.ZoomInRight(img).setSpeed(2.0).play();
+
     	});
     	
     }
@@ -221,7 +224,7 @@ public class ClientController implements Initializable {
 			serviceOut.flush();
 			
 			int historySize = (int) serviceIn.readObject();
-
+			history.clear();
 			for(int i=0; i<historySize; i++) {
 				Message ms = (Message) serviceIn.readObject();
 
@@ -231,13 +234,24 @@ public class ClientController implements Initializable {
 	            SimpleDateFormat formatter = new SimpleDateFormat("hh:mm EE");
 	     		String dateText = formatter.format(date);
 	     		  
-	            if (ms.getSenderName().equals(sender)) {
-	           	  importUsersMessage(ms.getMessage(), ms.getDate(), ms.isFileType());
-//	           	  createOtherMessage(ms.getMessage(), ms.getRecipientName(), dateText();
+	            if(ms.getImageType() == null) {
+	            	  if (ms.getSenderName().equals(sender)) {
+	    	           	  importUsersMessage(ms.getMessage(), ms.getDate());
+	    	            }
+	    	            else {
+	    	           	  createOtherMessage(ms.getMessage(), ms.getSenderName(), dateText);
+	    	            }
 	            }
-	            else {
-	           	  createOtherMessage(ms.getMessage(), ms.getSenderName(), dateText);
+	            else if(ms.getMessage() == null) {
+	            	 if (ms.getSenderName().equals(sender)) {
+	 	            	drawUserImageMessage(ms.getImageArray());
+	    	         }
+	    	         else {
+	    	        	 drawImageMessage(ms.getImageArray());
+	    	         }
+	            	
 	            }
+	            
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
@@ -291,7 +305,16 @@ public class ClientController implements Initializable {
     	            status.setFill(Color.GREEN); 
     	            status.setVisible(false);
     	            
-    	    	    
+//    	            Circle unread = new Circle(); 
+//    	            status.setRadius(10); 
+//    	            status.setFill(Color.BLUE); 
+//    	            status.setVisible(true);
+    	            
+//    	            AnchorPane unread = new AnchorPane();
+//    	            unread.setPrefWidth(20);
+//    	            unread.setPrefHeight(20);
+//    	            unread.setStyle("-fx-backgroung-color: blue; -fx-backgroung-radius: 20px;");
+//    	    	    
     	    	    vbox.getChildren().add(pane); 
     	    	    pane.getChildren().addAll(avatar, chatName, status);	
     	    	        	    	    
@@ -345,23 +368,28 @@ public class ClientController implements Initializable {
     	    	        }
     	    	    });
 
+    	    		new animatefx.animation.SlideInLeft(pane).setSpeed(1.5).play();
+
     	    	});
     		}
+
     	}    
     }
     
     public void userAuthentication() {
     	name = textName.getText();
-    	
+
     	connectToServer();
+
     	if (checkClientInDB(name)) {
 //    		updateActiveStatus(name, true);
 //    		connectToServer();
-    		new animatefx.animation.FadeOutDown(singInPane).setSpeed(2.5).play();
-    		new animatefx.animation.FadeInDown(chatPane).setSpeed(2.5).play();
     		chatPane.toFront();
     		chooseChatPane.toFront();
+    		new animatefx.animation.FadeOutDown(singInPane).setSpeed(2.5).play();
+    		new animatefx.animation.FadeInDown(chatPane).setSpeed(2.5).play();
     		addUser();
+
     	}
     	else { 
     		textName.clear();
@@ -392,7 +420,9 @@ public class ClientController implements Initializable {
         
 
     public void clientRegistration() {
-    	connectToServer();
+    	if(!statusSocket.isConnected()) {
+        	connectToServer();
+    	}
     	name = textName.getText();
     	Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Підтвердження реєстрації");
@@ -451,7 +481,7 @@ public class ClientController implements Initializable {
 	}
     }
    
-    public void importUsersMessage(String message, Date date, boolean fileType) {
+    public void importUsersMessage(String message, Date date) {
     	Platform.runLater(() -> {
     		Message ms = new Message(name, selectedChat, message, date);
     		SimpleDateFormat formatter = new SimpleDateFormat("hh:mm EE");
@@ -506,7 +536,6 @@ public class ClientController implements Initializable {
         	textMessage.clear();
         	scrollPane.vvalueProperty().bind(messagePane.heightProperty());
     		new animatefx.animation.ZoomInLeft(mainPane).setSpeed(2.0).play();
-
     }
     
     public void sendMessage(Message ms) {
@@ -548,7 +577,6 @@ public class ClientController implements Initializable {
         	
     		new animatefx.animation.ZoomInRight(mainPane).setSpeed(2.0).play();
 
-
         });
     }
 
@@ -563,7 +591,7 @@ public class ClientController implements Initializable {
                 	Message response = (Message) messageIn.readObject();
                 	if(response.isFileType()) {
             	        Message imageMsg = (Message) messageIn.readObject();
-         	  
+            	        
             	        int size = imageMsg.getImageSize();
                         byte[] imageArray = imageMsg.getImageArray();
 
@@ -572,8 +600,13 @@ public class ClientController implements Initializable {
                         System.out.println("Received " + image.getHeight() + "x" + image.getWidth() + ": " + System.currentTimeMillis());
                         
 //                        ImageIO.write(image, imageMsg.getImageType(), new File("/home/illyusha/Pictures/"+imageMsg.getImageName()+"."+ imageMsg.getImageType()));
-                        drawImageMessage(imageArray);
+                        if  (selectedChat.equals(imageMsg.getSenderName())) {
+                            drawImageMessage(imageArray);
+                            System.out.println("іди нахуй");
 
+                        }
+                        
+       
                 	}
                 	else {
                 		String message = response.getMessage();
@@ -586,6 +619,7 @@ public class ClientController implements Initializable {
                            createOtherMessage(message, senderName, dateText);
                            
                        }
+           
                 	}
                 }
             } catch (IOException | ClassNotFoundException  e) {

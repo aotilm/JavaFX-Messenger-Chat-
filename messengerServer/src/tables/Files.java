@@ -3,7 +3,7 @@ package tables;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "files")
+@Table
 public class Files {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,14 +14,13 @@ public class Files {
     private String fileType;
 
     @Column(name = "file")
-    private String file;
+    private byte[] file;
 
     public Files() {
     	
     }
 
-	public Files(String fileType, String file) {
-		super();
+	public Files(String fileType, byte[] file) {
 		this.fileType = fileType;
 		this.file = file;
 	}
@@ -42,11 +41,11 @@ public class Files {
 		this.fileType = fileType;
 	}
 
-	public String getFile() {
+	public byte[] getFile() {
 		return file;
 	}
 
-	public void setFile(String file) {
+	public void setFile(byte[] file) {
 		this.file = file;
 	}
     

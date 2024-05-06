@@ -115,7 +115,7 @@
                   <AnchorPane fx:id="singInPane" style="-fx-background-color: #2F3135;">
                      <children>
                         <TextField fx:id="textName" layoutX="222.0" layoutY="234.0" prefHeight="45.0" prefWidth="246.0" promptText="Логін" style="-fx-background-color: #5A5552; -fx-background-radius: 20px; -fx-text-fill: white; -fx-font-size: 18px; -fx-alignment: center; -fx-font-weight: bold;" />
-                        <Label fx:id="enterLabel" layoutX="399.0" layoutY="188.0" text="Вікно входу" textFill="WHITE">
+                        <Label fx:id="enterLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="7.0" layoutY="188.0" prefHeight="26.0" prefWidth="934.0" text="Вікно входу" textFill="WHITE">
                            <font>
                               <Font name="System Bold" size="22.0" />
                            </font>

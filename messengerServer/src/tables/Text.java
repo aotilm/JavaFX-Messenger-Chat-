@@ -3,7 +3,7 @@ package tables;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "text")
+@Table
 public class Text {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

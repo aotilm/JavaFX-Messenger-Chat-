@@ -1,56 +1,81 @@
 package application;
+
+import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.*;
+public class Message implements Serializable{
 
-import tables.Files;
-import tables.Text;
-
-@Entity
-@Table(name = "History")
-public class Message {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
-
-    @Column 
-	@Temporal(TemporalType.TIMESTAMP)
+	private int id;
+	 
+	private String senderName;
+	
+	private String recipientName;
+	
+	private String message;
+	
+	private int imageSize;
+	
+	private byte[] imageArray;
+	
+	private String imageType;
+	
+	private String imageName;
+	
     private Date date;
+	
+	private boolean fileType;
+	
 
-    @Column(name = "recipientName")
-    private String recipientName;
+	public Message() { 
+		
+	}
+	
+	
 
-    @Column(name = "senderName")
-    private String senderName;
 
-    @OneToOne
-    @JoinColumn(name = "fileID", unique = true)
-    private Files files;
 
-    @OneToOne
-    @JoinColumn(name = "textID", unique = true)
-    private Text text;
-
-    public Message() {
-    	
-    }
-    
-	public Message(Date date, String recipientName, String senderName, Files file, Text text) {
-		this.date = date;
-		this.recipientName = recipientName;
+	public Message(String message) {
+		this.message = message;
+	}
+	
+	public Message(String senderName, String recipientName) {
 		this.senderName = senderName;
-		this.files = file;
-		this.text = text;
+		this.recipientName = recipientName;
+	}
+	
+	public Message(String senderName, String recipientName, String message, Date date ) {
+		this.senderName = senderName;
+		this.recipientName = recipientName;
+		this.message = message;
+		this.date = date;
 	}
 
-	public int getId() {
-		return id;
+	public Message(String senderName, String recipientName, int size, byte[] imageArray, String imageType,
+			String imageName, Date date, boolean fileType) {
+		this.senderName = senderName;
+		this.recipientName = recipientName;
+		this.imageSize = size;
+		this.imageArray = imageArray;
+		this.imageType = imageType;
+		this.imageName = imageName;
+		this.date = date;
+		this.fileType = fileType;
+	}
+	
+	
+	
+	public Message(boolean type) {
+		this.fileType = type;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public Message(String senderName, String recipientName, String message, byte[] imageArray, String imageType,
+			Date date) {
+		this.senderName = senderName;
+		this.recipientName = recipientName;
+		this.message = message;
+		this.imageArray = imageArray;
+		this.imageType = imageType;
+		this.date = date;
 	}
 
 	public Date getDate() {
@@ -59,6 +84,14 @@ public class Message {
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+	
+	public String getSenderName() {
+		return senderName;
+	}
+
+	public void setSenderName(String senderName) {
+		this.senderName = senderName;
 	}
 
 	public String getRecipientName() {
@@ -69,30 +102,54 @@ public class Message {
 		this.recipientName = recipientName;
 	}
 
-	public String getSenderName() {
-		return senderName;
+	public String getMessage() {
+		return message;
 	}
 
-	public void setSenderName(String senderName) {
-		this.senderName = senderName;
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
-	public Files getFile() {
-		return files;
+	public boolean isFileType() {
+		return fileType;
 	}
 
-	public void setFile(Files file) {
-		this.files = file;
+	public void setFileType(boolean fileType) {
+		this.fileType = fileType;
 	}
 
-	public Text getText() {
-		return text;
+	public int getImageSize() {
+		return imageSize;
 	}
 
-	public void setText(Text text) {
-		this.text = text;
+	public void setImageSize(int imageSize) {
+		this.imageSize = imageSize;
 	}
 
+	public byte[] getImageArray() {
+		return imageArray;
+	}
+
+	public void setImageArray(byte[] imageArray) {
+		this.imageArray = imageArray;
+	}
+
+	public String getImageType() {
+		return imageType;
+	}
+
+	public void setImageType(String imageType) {
+		this.imageType = imageType;
+	}
+
+	public String getImageName() {
+		return imageName;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
+	}
 	
-    
+	
+	
 }

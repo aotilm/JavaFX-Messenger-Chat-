@@ -18,9 +18,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.io.ByteArrayInputStream;
-
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.imageio.ImageIO;
 
 import org.hibernate.HibernateException;
@@ -31,12 +34,16 @@ import org.hibernate.query.Query;
 
 import application.EnterOrReg;
 import application.Message;
+import application.ImportedHist;
 import tables.Clients;
+import tables.Files;
+import tables.History;
+import tables.Text;
 
 
 
 public class serverMain {
-    
+
     public static void main(String[] args) {
         Server server = new Server();
     }
@@ -152,11 +159,12 @@ class ClientHandler implements Runnable {
     public String name;
 
     public ArrayList<Clients> users = new ArrayList<>();
-    public ArrayList<Message> history = new ArrayList<>();
+    public List<ImportedHist> importedHistList = new ArrayList<>();
 
     ImportHistoryReader importReader;
     ActiveStatusReader statusReader;
     
+
     public ClientHandler(Socket socket, Server server, Socket msgSocket, Socket stSocket) {
         try {
         	this.serviceSocket = socket;
@@ -224,7 +232,7 @@ class ClientHandler implements Runnable {
         			Message file = (Message) messageIn.readObject();
         	        server.sendToChat(file,response, this);
         	        System.out.println("Файл переслано клієнту!");
-
+            		saveMessage(file);
         		}
         		else {
         			Message sg = new Message(false);
@@ -274,37 +282,57 @@ class ClientHandler implements Runnable {
    }
     
     public void importHistory(Message ms) {
-    	SessionFactory factory = new Configuration()
-     			.configure("hibernate.cfg.xml")
-     			.addAnnotatedClass(Message.class) 
-     			.buildSessionFactory();  
-     	Session session = factory.openSession();
-         try {
-             session.beginTransaction();
+    	 SessionFactory factory = new Configuration()
+    	            .configure("hibernate.cfg.xml")
+    	            .addAnnotatedClass(History.class)
+    	            .addAnnotatedClass(Text.class)
+    	            .addAnnotatedClass(Files.class)
+    	            .buildSessionFactory();
 
-             Query<Message> query = session.createQuery("FROM Message WHERE recipientName = ?1 and senderName = ?2 "
-             		+ "or recipientName =?2 and senderName = ?1", Message.class);
-             query.setParameter(1, ms.getRecipientName());
-             query.setParameter(2, ms.getSenderName());
+    	    Session historySession = factory.openSession();
+    	    try {
+    	        historySession.beginTransaction();
 
-             history.clear();
-             history.addAll(query.list());
-           
-             session.getTransaction().commit();
+    	        Query<Object[]> query = historySession.createQuery(
+    	        		"SELECT h.id, h.date, h.recipientName, h.senderName, t.message, f.fileType, f.file " +
+    	                "FROM History h " +
+    	                "LEFT JOIN h.text t " +
+    	                "LEFT JOIN h.files f " +
+    	                "WHERE (h.recipientName = ?1 AND h.senderName = ?2) OR " +
+    	                "(h.recipientName = ?2 AND h.senderName = ?1)");
+    	        query.setParameter(1, ms.getRecipientName());
+    	        query.setParameter(2, ms.getSenderName());
+    	        
+    	        List<Object[]> result = query.list();
+    	        importedHistList.clear();
+    	        for (Object[] row : result) {
+    	            ImportedHist importedHist = new ImportedHist();
+    	            importedHist.setId((Integer) row[0]);
+    	            importedHist.setDate((Date) row[1]);
+    	            importedHist.setRecipientName((String) row[2]);
+    	            importedHist.setSenderName((String) row[3]);
+    	            importedHist.setMessage((String) row[4]);
+    	            importedHist.setFileType((String) row[5]);
+    	            importedHist.setFile((byte[]) row[6]);
+    	            importedHistList.add(importedHist);
+    	        }
+
+    	        System.out.println(importedHistList.toString());
+    	        historySession.getTransaction().commit();
          }finally {
-             session.close();
-             factory.close();
+        	 historySession.close();
+        	 factory.close();
          }
          
          try {
-			serviceOut.writeObject(history.size());
+			serviceOut.writeObject(importedHistList.size());
 			serviceOut.flush();
 	         
-	        for(int i=0; i<history.size(); i++) {
-	        	 Message hs = history.get(i);
-	        	 serviceOut.writeObject(hs);
-	        	 serviceOut.flush();
-	         }
+			 for (ImportedHist hs : importedHistList) {
+				 	Message hms = new Message(hs.getSenderName(), hs.getRecipientName(), hs.getMessage(), hs.getFile(), hs.getFileType(), hs.getDate());
+				 	serviceOut.writeObject(hms);
+		            serviceOut.flush();
+		        }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -337,23 +365,42 @@ class ClientHandler implements Runnable {
        }
    }
 
-    public void saveMessage(Message ms) {
-    	SessionFactory factory = new Configuration()
-                .configure("hibernate.cfg.xml")
-                .addAnnotatedClass(Message.class)
-                .buildSessionFactory();
-    	
-    	Session session = factory.getCurrentSession();
-		try {
-			session.beginTransaction();
-			
-			session.save(ms);
-			
-			session.flush();
-			System.out.println("Повідомлення збережено!");
-			session.getTransaction().commit();
-		} finally { factory.close(); session.close();}
-    }
+   public void saveMessage(Message ms) {
+	    SessionFactory sessionFactory = new Configuration()
+	            .configure("hibernate.cfg.xml")
+	            .addAnnotatedClass(History.class)
+	            .addAnnotatedClass(Text.class)
+	            .addAnnotatedClass(Files.class)
+	            .buildSessionFactory();
+
+	    Session session = sessionFactory.getCurrentSession();
+
+	    try {
+	        session.beginTransaction();
+
+	        if (!ms.isFileType()) {
+	            Text message = new Text(ms.getMessage());
+	            session.save(message);
+
+	            History history = new History(message, null, ms.getDate(), ms.getRecipientName(), ms.getSenderName());
+
+	            session.save(history);
+	        } else {
+	            Files file = new Files(ms.getImageType(), ms.getImageArray());
+	            session.save(file);
+
+	            History history = new History(null, file, ms.getDate(), ms.getRecipientName(), ms.getSenderName());
+	
+	            session.save(history);
+	        }
+
+	        session.getTransaction().commit();
+	        System.out.println("Повідомлення збережено!");
+	    } finally {
+	        sessionFactory.close();
+	    }
+	}
+
     
 	public void selectAllUser() {
     	try {
@@ -535,7 +582,7 @@ class ActiveStatusReader implements Runnable{
   			try {
   				selectActiveUsers();
   	   			server.sendStatusToAll(activeUsers.size());
-				Thread.sleep(2000);
+				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

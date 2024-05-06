@@ -3,15 +3,6 @@ package application;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 public class Message implements Serializable{
 
 	private int id;
@@ -43,6 +34,16 @@ public class Message implements Serializable{
 		this.message = message;
 	}
 	
+	public Message(String senderName, String recipientName, String message, byte[] imageArray, String imageType,
+			Date date) {
+		this.senderName = senderName;
+		this.recipientName = recipientName;
+		this.message = message;
+		this.imageArray = imageArray;
+		this.imageType = imageType;
+		this.date = date;
+	}
+	
 	public Message(String senderName, String recipientName) {
 		this.senderName = senderName;
 		this.recipientName = recipientName;
@@ -66,6 +67,8 @@ public class Message implements Serializable{
 		this.date = date;
 		this.fileType = fileType;
 	}
+	
+	
 	
 	public Message(boolean type) {
 		this.fileType = type;
