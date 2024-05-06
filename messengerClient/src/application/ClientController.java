@@ -602,7 +602,6 @@ public class ClientController implements Initializable {
 //                        ImageIO.write(image, imageMsg.getImageType(), new File("/home/illyusha/Pictures/"+imageMsg.getImageName()+"."+ imageMsg.getImageType()));
                         if  (selectedChat.equals(imageMsg.getSenderName())) {
                             drawImageMessage(imageArray);
-                            System.out.println("іди нахуй");
 
                         }
                         
@@ -644,9 +643,9 @@ public class ClientController implements Initializable {
 							activeUsers.add(activeClient);
 
 						}
-						System.out.println("--------------------------------------");
-						System.out.println(activeUsers.toString());
-						System.out.println("--------------------------------------");
+//						System.out.println("--------------------------------------");
+//						System.out.println(activeUsers.toString());
+//						System.out.println("--------------------------------------");
 						changeStatus();
 					} catch (ClassNotFoundException | IOException e) {
 						e.printStackTrace();
